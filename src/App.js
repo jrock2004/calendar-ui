@@ -5,10 +5,10 @@ import resources from './data/resources';
 import './App.css';
 
 function App() {
-  const businessHours = {
-    startTime: "08:00",
-    endTime: "17:00"
-  }
+  // const businessHours = {
+  //   startTime: "08:00",
+  //   endTime: "17:00"
+  // }
 
   const resourceContent = ({resource}) => {
     const { title, extendedProps} = resource;
