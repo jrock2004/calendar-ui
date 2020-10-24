@@ -7,6 +7,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   const [state, setState ] = useState({
     title: '',
     employeeId: selectInfo.resource.id,
+    customerName: '',
   });
 
   const employeeName = selectInfo ? `with ${selectInfo.resource.title}` : null;
@@ -25,16 +26,20 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
 
     let calendarApi = selectInfo.view.calendar;
     const title = state.title;
+    const customerName = state.customerName;
 
     calendarApi.unselect();
 
-    if (title) {
+    if (title && customerName) {
       calendarApi.addEvent({
         id: createEventId(),
         title,
         start: selectInfo.startStr,
         end: selectInfo.endStr,
-        resourceId: selectInfo.resource.id
+        resourceId: selectInfo.resource.id,
+        customer: {
+          fullName: customerName
+        }
       });
     }
 
@@ -45,6 +50,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
     setState({
       title: '',
       employeeId: '',
+      customerName: '',
     });
 
     toggleNewAppointment();
@@ -59,7 +65,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
         </button>
       </header>
       <main className="px-4 py-8">
-        <div className="flex flex-col">
+        <div className="flex flex-col mb-4">
           <label htmlFor="new-appointment-title" className="mb-2 font-semibold text-sm">Title</label>
           <input
             type="text"
@@ -67,6 +73,18 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
             name="title"
             id="new-appointment-title"
             value={state.title}
+            onChange={handleChange}
+          />
+        </div>
+
+        <div className="flex flex-col mb-4">
+          <label htmlFor="new-appointment-customer" className="mb-2 font-semibold text-sm">Customer Name</label>
+          <input
+            type="text"
+            className="border w-full px-2 py-1 rounded-sm"
+            name="customerName"
+            id="new-appointment-customer"
+            value={state.customerName}
             onChange={handleChange}
           />
         </div>
