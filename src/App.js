@@ -54,6 +54,7 @@ function App() {
           select={handleDateClick}
           eventContent={renderEventContent}
         />
+
         {state.showNewAppointmentBubble && (
           <NewAppointmentBubble
             selectInfo={state.selectInfo}

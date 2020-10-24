@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 
-
 import { createEventId } from '../data/events';
+import {services} from '../data/services';
 
 export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   const [state, setState ] = useState({
-    title: '',
     employeeId: selectInfo.resource.id,
     customerName: '',
+    selectedServiceId: '',
   });
 
   const employeeName = selectInfo ? `with ${selectInfo.resource.title}` : null;
-
-  console.log(selectInfo);
 
   const handleChange = (event) => {
     setState({
@@ -24,16 +22,21 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    let calendarApi = selectInfo.view.calendar;
-    const title = state.title;
+    const calendarApi = selectInfo.view.calendar;
+    const selectedServiceId = state.selectedServiceId;
+
+    // If they did not select a service
+    if (!selectedServiceId) return;
+
+    const service = services.find(serv => serv.id === selectedServiceId);
     const customerName = state.customerName;
 
     calendarApi.unselect();
 
-    if (title && customerName) {
+    if (service && customerName) {
       calendarApi.addEvent({
         id: createEventId(),
-        title,
+        title: service.name,
         start: selectInfo.startStr,
         end: selectInfo.endStr,
         resourceId: selectInfo.resource.id,
@@ -48,9 +51,9 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
 
   const handleClose = () => {
     setState({
-      title: '',
-      employeeId: '',
       customerName: '',
+      employeeId: '',
+      selectedServiceId: '',
     });
 
     toggleNewAppointment();
@@ -66,18 +69,6 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
       </header>
       <main className="px-4 py-8">
         <div className="flex flex-col mb-4">
-          <label htmlFor="new-appointment-title" className="mb-2 font-semibold text-sm">Title</label>
-          <input
-            type="text"
-            className="border w-full px-2 py-1 rounded-sm"
-            name="title"
-            id="new-appointment-title"
-            value={state.title}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="flex flex-col mb-4">
           <label htmlFor="new-appointment-customer" className="mb-2 font-semibold text-sm">Customer Name</label>
           <input
             type="text"
@@ -87,6 +78,26 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
             value={state.customerName}
             onChange={handleChange}
           />
+        </div>
+
+        <div className="flex flex-col mb-4">
+          <label htmlFor="new-appointment-services" className="mb-2 font-semibold text-sm">Choose a service</label>
+          <div className="relative">
+            <select
+              className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+              name="selectedServiceId"
+              value={state.selectedServiceId}
+              onChange={handleChange}
+            >
+              <option>Please select a service</option>
+              {services.map(service =>
+                <option key={service.id} value={service.id}>{service.name}</option>
+              )}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+          </div>
         </div>
       </main>
       <footer className="mt-auto border-t px-4 py-6">
