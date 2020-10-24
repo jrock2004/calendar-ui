@@ -19,25 +19,10 @@ function App() {
   });
 
   const handleDateClick = (selectInfo) => {
-    // let title = prompt("Please enter a new title for your event");
-    //let calendarApi = selectInfo.view.calendar;
-
-    //calendarApi.unselect(); // clear date selection
-
     setState({
       showNewAppointmentBubble: true,
       selectInfo: selectInfo,
     });
-
-    // if (title) {
-    //   calendarApi.addEvent({
-    //     id: createEventId(),
-    //     title,
-    //     start: selectInfo.startStr,
-    //     end: selectInfo.endStr,
-    //     resourceId: "resource-2"
-    //   });
-    // }
   }
 
   const toggleNewAppointment = () => {
@@ -65,6 +50,7 @@ function App() {
           nowIndicator={true}
           editable={true}
           selectable={true}
+          selectConstraint="businessHours"
           select={handleDateClick}
           eventContent={renderEventContent}
         />
