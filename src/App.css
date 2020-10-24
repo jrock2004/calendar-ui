@@ -1,3 +1,8 @@
 :root {
   --fc-today-bg-color: #fff;
 }
+
+.new-appointment {
+  min-height: 40%;
+  z-index: 100;
+}
