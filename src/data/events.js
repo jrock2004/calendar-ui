@@ -6,7 +6,7 @@ export const INITIAL_EVENTS = [
     id: createEventId(),
     // backgroundColor: "#fff",
     resourceId: "resource-2",
-    title: "Haircut",
+    title: "Trim",
     start: todayStr + 'T12:00:00',
     end: todayStr + 'T12:15:00',
     customer: {

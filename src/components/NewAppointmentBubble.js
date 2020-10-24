@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import addMinutes from 'date-fns/addMinutes';
+import formatISO from 'date-fns/formatISO';
 
 import { createEventId } from '../data/events';
 import {services} from '../data/services';
@@ -30,6 +32,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
 
     const service = services.find(serv => serv.id === selectedServiceId);
     const customerName = state.customerName;
+    const endTime = addMinutes(selectInfo.start, service.duration);
 
     calendarApi.unselect();
 
@@ -38,7 +41,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
         id: createEventId(),
         title: service.name,
         start: selectInfo.startStr,
-        end: selectInfo.endStr,
+        end: formatISO(endTime),
         resourceId: selectInfo.resource.id,
         customer: {
           fullName: customerName

@@ -21,6 +21,11 @@ export const services = [
     name: 'Massage',
     duration: '60'
   },
+  {
+    id: createEventId(),
+    name: 'Trim',
+    duration: '15'
+  },
 ];
 
 export function createEventId() {
