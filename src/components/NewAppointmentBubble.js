@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import addMinutes from 'date-fns/addMinutes';
 import formatISO from 'date-fns/formatISO';
 
+import {UiInput} from './UiInput';
+import {UiSelect} from './UiSelect';
 import { createEventId } from '../data/events';
 import {services} from '../data/services';
 import {resources} from '../data/resources';
@@ -83,58 +85,38 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
         </button>
       </header>
       <main className="px-4 py-8">
-        <div className="flex flex-col mb-4">
-          <label htmlFor="new-appointment-customer" className="mb-2 font-semibold text-sm">Customer Name</label>
-          <input
-            type="text"
-            className="border w-full px-2 py-1 rounded-sm"
-            name="customerName"
-            id="new-appointment-customer"
-            value={state.customerName}
-            onChange={handleChange}
-          />
-        </div>
+        <UiInput
+          name="customerName"
+          label="Customer Name"
+          value={state.customerName}
+          handleChange={handleChange}
+        />
 
-        <div className="flex flex-col mb-4">
-          <label htmlFor="new-appointment-services" className="mb-2 font-semibold text-sm">Choose a service</label>
-          <div className="relative">
-            <select
-              className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-              name="selectedServiceId"
-              value={state.selectedServiceId}
-              onChange={handleChange}
-            >
-              <option>Please select a service</option>
-              {services.map(service =>
-                <option key={service.id} value={service.id}>{service.name}</option>
-              )}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-            </div>
-          </div>
-        </div>
+        <UiSelect
+          name="selectedServiceId"
+          label="Choose a service"
+          value={state.selectedServiceId}
+          handleChange={handleChange}
+        >
+          <option>Please select a service</option>
+          {services.map(service =>
+            <option key={service.id} value={service.id}>{service.name}</option>
+          )}
+        </UiSelect>
 
-        <div className="flex flex-col mb-4">
-          <label htmlFor="new-appointment-employees" className="mb-2 font-semibold text-sm">Choose a employee</label>
-          <div className="relative">
-            <select
-              className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
-              name="employeeId"
-              value={state.employeeId}
-              onChange={handleEmployeeChange}
-            >
-              <option>Please select a employee</option>
-              {resources.map(resource =>
-                <option key={resource.id} value={resource.id}>{resource.title}</option>
-              )}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-            </div>
-          </div>
-        </div>
+        <UiSelect
+          name="employeeId"
+          label="Choose a employee"
+          value={state.employeeId}
+          handleChange={handleEmployeeChange}
+        >
+          <option>Please select a employee</option>
+          {resources.map(resource =>
+            <option key={resource.id} value={resource.id}>{resource.title}</option>
+          )}
+        </UiSelect>
       </main>
+
       <footer className="mt-auto border-t px-4 py-6">
         <button
           type="submit"
