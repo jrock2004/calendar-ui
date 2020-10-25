@@ -4,21 +4,32 @@ import formatISO from 'date-fns/formatISO';
 
 import { createEventId } from '../data/events';
 import {services} from '../data/services';
+import {resources} from '../data/resources';
 
 export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   const [state, setState ] = useState({
-    employeeId: selectInfo.resource.id,
     customerName: '',
+    employeeId: selectInfo ? selectInfo.resource.id : '',
+    employeeName: selectInfo ? `with ${selectInfo.resource.title}` : '',
     selectedServiceId: '',
   });
-
-  const employeeName = selectInfo ? `with ${selectInfo.resource.title}` : null;
 
   const handleChange = (event) => {
     setState({
       ...state,
       [event.target.name]: event.target.value
     });
+  }
+
+  const handleEmployeeChange = (event) => {
+    const value = event.target.value;
+    const resource = resources.find(res => res.id === value);
+
+    setState({
+      ...state,
+      employeeId: resource.id,
+      employeeName: `with ${resource.title}`,
+    })
   }
 
   const handleSubmit = (e) => {
@@ -42,7 +53,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
         title: service.name,
         start: selectInfo.startStr,
         end: formatISO(endTime),
-        resourceId: selectInfo.resource.id,
+        resourceId: state.employeeId,
         customer: {
           fullName: customerName
         }
@@ -56,6 +67,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
     setState({
       customerName: '',
       employeeId: '',
+      employeeName: '',
       selectedServiceId: '',
     });
 
@@ -65,7 +77,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   return (
     <form className="absolute border w-1/3 right-0 bottom-0 new-appointment bg-white flex flex-col" onSubmit={handleSubmit}>
       <header className="bg-black text-white px-4 py-2 flex justify-between">
-        <h4>New Appointment {employeeName}</h4>
+        <h4>New Appointment {state.employeeName}</h4>
         <button onClick={handleClose}>
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
@@ -102,13 +114,33 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
             </div>
           </div>
         </div>
+
+        <div className="flex flex-col mb-4">
+          <label htmlFor="new-appointment-employees" className="mb-2 font-semibold text-sm">Choose a employee</label>
+          <div className="relative">
+            <select
+              className="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline"
+              name="employeeId"
+              value={state.employeeId}
+              onChange={handleEmployeeChange}
+            >
+              <option>Please select a employee</option>
+              {resources.map(resource =>
+                <option key={resource.id} value={resource.id}>{resource.title}</option>
+              )}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+          </div>
+        </div>
       </main>
       <footer className="mt-auto border-t px-4 py-6">
         <button
           type="submit"
           className="border rounded-sm bg-teal-400 text-white text-xl uppercase x-4 py-2 w-full"
         >
-          Book {employeeName}
+          Book {state.employeeName}
         </button>
       </footer>
     </form>

@@ -1,4 +1,4 @@
-let resources = [
+export const resources = [
   {
     "id": "resource-1",
     "title": "John",
@@ -6,7 +6,7 @@ let resources = [
     "businessHours": [{
       startTime: '08:00',
       endTime: '13:00',
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7]
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6]
     }],
   },
   {
@@ -16,7 +16,7 @@ let resources = [
     "businessHours": [{
       startTime: '08:00',
       endTime: '14:00',
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7]
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6]
     }]
   },
   {
@@ -26,7 +26,7 @@ let resources = [
     "businessHours": [{
       startTime: '08:00',
       endTime: '14:00',
-      daysOfWeek: [1, 2, 3, 4, 5, 6, 7]
+      daysOfWeek: [0, 1, 2, 3, 4, 5, 6]
     }],
   }
 ]

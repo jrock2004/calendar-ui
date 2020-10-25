@@ -32,6 +32,21 @@ function App() {
     })
   }
 
+  const customButtons = {
+    newAppointment: {
+      text: 'New Appointment',
+      click: () => {
+        toggleNewAppointment();
+      }
+    }
+  }
+
+  const headerToolbar = {
+    start: 'title',
+    center: '',
+    end: 'today prev,next',
+  }
+
   return (
     <>
       <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
@@ -53,6 +68,8 @@ function App() {
           selectConstraint="businessHours"
           select={handleDateClick}
           eventContent={renderEventContent}
+          customButtons={customButtons}
+          headerToolbar={headerToolbar}
         />
 
         {state.showNewAppointmentBubble && (
