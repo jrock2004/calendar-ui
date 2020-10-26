@@ -35,15 +35,15 @@ function App() {
   const customButtons = {
     newAppointment: {
       text: 'New Appointment',
-      click: () => {
-        toggleNewAppointment();
+      click: (event) => {
+        // toggleNewAppointment();
       }
     }
   }
 
   const headerToolbar = {
     start: 'title',
-    center: '',
+    center: 'newAppointment',
     end: 'today prev,next',
   }
 
