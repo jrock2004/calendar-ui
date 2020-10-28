@@ -2,15 +2,18 @@ import React, { useState } from 'react';
 import addMinutes from 'date-fns/addMinutes';
 import formatISO from 'date-fns/formatISO';
 
-import {UiInput} from './UiInput';
 import {UiSelect} from './UiSelect';
+import {InputSuggest} from './input/InputSuggest';
+
 import { createEventId } from '../data/events';
 import {services} from '../data/services';
 import {resources} from '../data/resources';
+import {customers} from '../data/customers';
 
 export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   const [state, setState ] = useState({
     customerName: '',
+    selectedCustomer: {},
     employeeId: selectInfo ? selectInfo.resource.id : '',
     employeeName: selectInfo ? `with ${selectInfo.resource.title}` : '',
     selectedServiceId: '',
@@ -39,12 +42,13 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
 
     const calendarApi = selectInfo.view.calendar;
     const selectedServiceId = state.selectedServiceId;
+    const selectedCustomer = state.selectedCustomer;
 
     // If they did not select a service
     if (!selectedServiceId) return;
 
     const service = services.find(serv => serv.id === selectedServiceId);
-    const customerName = state.customerName;
+    const customerName = `${selectedCustomer.firstName} ${selectedCustomer.lastName}`;
     const endTime = addMinutes(selectInfo.start, service.duration);
 
     calendarApi.unselect();
@@ -57,6 +61,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
         end: formatISO(endTime),
         resourceId: state.employeeId,
         customer: {
+          ...selectedCustomer,
           fullName: customerName
         }
       });
@@ -71,9 +76,20 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
       employeeId: '',
       employeeName: '',
       selectedServiceId: '',
+      selectedCustomer: {},
     });
 
     toggleNewAppointment();
+  }
+
+  const handleSelectCustomer = (item) => {
+    const customerName = `${item.firstName} ${item.lastName}`;
+
+    setState({
+      ...state,
+      selectedCustomer: item,
+      customerName: customerName,
+    });
   }
 
   return (
@@ -85,11 +101,10 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
         </button>
       </header>
       <main className="px-4 py-8">
-        <UiInput
-          name="customerName"
+        <InputSuggest
+          suggestions={customers}
           label="Customer Name"
-          value={state.customerName}
-          handleChange={handleChange}
+          handleClick={handleSelectCustomer}
         />
 
         <UiSelect

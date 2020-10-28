@@ -9,7 +9,15 @@ export const INITIAL_EVENTS = [
     title: "Trim",
     start: todayStr + 'T12:00:00',
     end: todayStr + 'T12:15:00',
-    customerId: 'customer-0',
+    customer: {
+      id: 'customer-0',
+      firstName: 'Han',
+      lastName: 'Solo',
+      email: 'han.solo@test.com',
+      phone: '7165551234',
+      fullName: 'Han Solo',
+    }
+
   },
   {
     id: `event-${createEventId()}`,
@@ -18,7 +26,14 @@ export const INITIAL_EVENTS = [
     title: "Haircut",
     start: todayStr + 'T09:00:00',
     end: todayStr + 'T10:00:00',
-    customerId: 'customer-1',
+    customer: {
+      id: 'customer-1',
+      firstName: 'Luke',
+      lastName: 'Skywalker',
+      email: 'luke.skywalker@test.com',
+      phone: '7165555678',
+      fullName: 'Luke Skywalker',
+    }
   },
   {
     id: `event-${createEventId()}`,
@@ -27,7 +42,14 @@ export const INITIAL_EVENTS = [
     title: "Haircut",
     start: todayStr + 'T12:00:00',
     end: todayStr + 'T12:30:00',
-    customerId: 'customer-2',
+    customer: {
+      id: 'customer-2',
+      firstName: 'Emperor',
+      lastName: 'Palpatine',
+      email: 'emperor.palpatine@test.com',
+      phone: '7025559876',
+      fullName: 'Emperor Palpatine',
+    }
   },
 ]
 
