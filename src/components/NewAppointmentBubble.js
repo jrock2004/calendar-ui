@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import addMinutes from 'date-fns/addMinutes';
-import formatISO from 'date-fns/formatISO';
 
+import {UiInput} from './UiInput';
 import {UiSelect} from './UiSelect';
 import {InputSuggest} from './input/InputSuggest';
 
@@ -10,13 +10,17 @@ import {services} from '../data/services';
 import {resources} from '../data/resources';
 import {customers} from '../data/customers';
 
-export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
+export const NewAppointmentBubble = ({selectInfo, calendarRef, toggleNewAppointment}) => {
   const [state, setState ] = useState({
     customerName: '',
     selectedCustomer: {},
     employeeId: selectInfo ? selectInfo.resource.id : '',
     employeeName: selectInfo ? `with ${selectInfo.resource.title}` : '',
     selectedServiceId: '',
+    startHour: '',
+    startMinute: '',
+    endHour: '',
+    endMinute: '',
   });
 
   const handleChange = (event) => {
@@ -40,7 +44,7 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const calendarApi = selectInfo.view.calendar;
+    const calendarApi = selectInfo ? selectInfo.view.calendar : calendarRef;
     const selectedServiceId = state.selectedServiceId;
     const selectedCustomer = state.selectedCustomer;
 
@@ -49,7 +53,23 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
 
     const service = services.find(serv => serv.id === selectedServiceId);
     const customerName = `${selectedCustomer.firstName} ${selectedCustomer.lastName}`;
-    const endTime = addMinutes(selectInfo.start, service.duration);
+
+    let startTime = '',
+      endTime = '';
+
+    // If select info exists, use that
+    if (selectInfo) {
+      startTime = selectInfo.startStr;
+      endTime = calendarApi.formatIso(addMinutes(selectInfo.start, service.duration));
+    } else {
+      let date = calendarApi.getDate();
+
+      date.setHours(state.startHour);
+      date.setMinutes(state.startMinute);
+
+      startTime = calendarApi.formatIso(date);
+      endTime = calendarApi.formatIso(addMinutes(date, service.duration));
+    }
 
     calendarApi.unselect();
 
@@ -57,8 +77,8 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
       calendarApi.addEvent({
         id: createEventId(),
         title: service.name,
-        start: selectInfo.startStr,
-        end: formatISO(endTime),
+        start: startTime,
+        end: endTime,
         resourceId: state.employeeId,
         customer: {
           ...selectedCustomer,
@@ -130,6 +150,28 @@ export const NewAppointmentBubble = ({selectInfo, toggleNewAppointment}) => {
             <option key={resource.id} value={resource.id}>{resource.title}</option>
           )}
         </UiSelect>
+
+        {!selectInfo && (
+          <div>
+            <h5 className="mb-2">Set Start Time</h5>
+
+            <div className="flex justify-between">
+              <UiInput
+                name="startHour"
+                label="Hour"
+                value={state.startHour}
+                handleChange={handleChange}
+              />
+
+              <UiInput
+                name="startMinute"
+                label="Minute"
+                value={state.startMinute}
+                handleChange={handleChange}
+              />
+            </div>
+          </div>
+        )}
       </main>
 
       <footer className="mt-auto border-t px-4 py-6">
