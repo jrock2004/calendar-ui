@@ -18,6 +18,7 @@ class App extends Component {
     super(props);
 
     this.state = {
+      calendarApi: null,
       resources: resources,
       selectInfo: null,
       showNewAppointmentBubble: false,
@@ -27,9 +28,18 @@ class App extends Component {
   }
 
   handleDateClick = (selectInfo) => {
+    let { end, resource, start, view } = selectInfo;
+
     this.setState({
+      calendarApi: view.calendar,
       showNewAppointmentBubble: true,
-      selectInfo: selectInfo,
+      selectInfo: {
+        ...this.state.selectInfo,
+        end: end,
+        employeeId: resource.id,
+        employeeName: resource.title,
+        start: start,
+      }
     });
   }
 
@@ -58,6 +68,7 @@ class App extends Component {
 
     this.setState({
       ...this.state,
+      calendarApi: this.calendarRef,
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
       selectInfo: {
@@ -102,10 +113,12 @@ class App extends Component {
           {this.state.showNewAppointmentBubble && (
             <BubbleContainer
               submitButtonText="Book"
-              title={`New Appointment with ${this.state.selectInfo.resource.title}`}
+              title={`New Appointment with ${this.state.selectInfo.employeeName}`}
               toggleBubble={this.toggleNewAppointment}
             >
               <AppointmentWrapper
+                employeeId={this.state.selectInfo.employeeId}
+                employeeName={this.state.selectInfo.employeeName}
                 end={this.state.selectInfo.end}
                 start={this.state.selectInfo.start}
               />
@@ -120,9 +133,9 @@ class App extends Component {
             >
               <AppointmentWrapper
                 customerName={this.state.selectInfo.customerName}
-                end={this.state.selectInfo.end}
                 employeeId={this.state.selectInfo.employeeId}
                 employeeName={this.state.selectInfo.employeeName}
+                end={this.state.selectInfo.end}
                 selectedServiceId={this.state.selectInfo.selectedServiceId}
                 start={this.state.selectInfo.start}
               />
