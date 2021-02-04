@@ -4,7 +4,6 @@ let todayStr = new Date().toISOString().replace(/T.*$/, '');
 export const INITIAL_EVENTS = [
   {
     id: `event-${createEventId()}`,
-    // backgroundColor: "#fff",
     resourceId: "resource-1",
     title: "Trim",
     start: todayStr + 'T12:00:00',
@@ -21,7 +20,6 @@ export const INITIAL_EVENTS = [
   },
   {
     id: `event-${createEventId()}`,
-    // backgroundColor: "#fff",
     resourceId: "resource-2",
     title: "Haircut",
     start: todayStr + 'T09:00:00',
@@ -33,22 +31,6 @@ export const INITIAL_EVENTS = [
       email: 'luke.skywalker@test.com',
       phone: '7165555678',
       fullName: 'Luke Skywalker',
-    }
-  },
-  {
-    id: `event-${createEventId()}`,
-    // backgroundColor: "#fff",
-    resourceId: "resource-3",
-    title: "Haircut",
-    start: todayStr + 'T12:00:00',
-    end: todayStr + 'T12:30:00',
-    customer: {
-      id: 'customer-2',
-      firstName: 'Emperor',
-      lastName: 'Palpatine',
-      email: 'emperor.palpatine@test.com',
-      phone: '7025559876',
-      fullName: 'Emperor Palpatine',
     }
   },
 ]
