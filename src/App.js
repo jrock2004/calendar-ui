@@ -35,7 +35,7 @@ class App extends Component {
   }
 
   handleEventClick = ({event}) => {
-    let { extendedProps, title } = event,
+    let { extendedProps, title, end, start } = event,
       { customer } = extendedProps;
 
     let eventResource = event.getResources()[0];
@@ -48,6 +48,8 @@ class App extends Component {
       resourceId: eventResource.id,
       resourceTitle: eventResource.title,
       selectedServiceId: selectedService.id,
+      end: end,
+      start: start,
     }
 
     this.setState({

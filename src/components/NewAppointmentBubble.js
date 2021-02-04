@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import addMinutes from 'date-fns/addMinutes';
 
 import {UiInput} from './UiInput';
@@ -17,8 +18,10 @@ export const NewAppointmentBubble = ({selectInfo, calendarRef, toggleNewAppointm
     employeeId: selectInfo ? selectInfo.resource.id : '',
     employeeName: selectInfo ? `with ${selectInfo.resource.title}` : '',
     selectedServiceId: '',
+    start: selectInfo ? selectInfo.start : '',
     startHour: '',
     startMinute: '',
+    end: selectInfo ? selectInfo.end : '',
     endHour: '',
     endMinute: '',
   });
@@ -112,8 +115,22 @@ export const NewAppointmentBubble = ({selectInfo, calendarRef, toggleNewAppointm
     });
   }
 
+  const GetAppointmentTime = () => {
+    let { end, start } = state;
+
+    return (
+      <div className="mb-8">
+        <span className="font-semibold">Start Time: </span>
+        <span>{format(start, 'hh:mm aaa')}</span>
+        <span className="mx-2">-</span>
+        <span className="font-semibold">End Time: </span>
+        <span>{format(end, 'hh:mm aaa')}</span>
+      </div>
+    )
+  }
+
   return (
-    <form className="absolute border w-1/3 right-0 bottom-0 new-appointment bg-white flex flex-col" onSubmit={handleSubmit}>
+    <form className="absolute border w-1/3 right-0 bottom-0 new-appointment bg-white flex flex-col shadow-2xl" onSubmit={handleSubmit}>
       <header className="bg-black text-white px-4 py-2 flex justify-between">
         <h4>New Appointment {state.employeeName}</h4>
         <button onClick={handleClose}>
@@ -121,6 +138,7 @@ export const NewAppointmentBubble = ({selectInfo, calendarRef, toggleNewAppointm
         </button>
       </header>
       <main className="px-4 py-8">
+        <GetAppointmentTime />
         <InputSuggest
           suggestions={customers}
           label="Customer Name"
