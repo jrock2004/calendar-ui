@@ -5,13 +5,13 @@ import ListItem from './ListItem';
 import Results from './Results';
 import { filterList } from './utils/filterList';
 
-export const InputSuggest = ({ label, suggestions, handleClick }) => {
+export const InputSuggest = ({ label, suggestions, handleClick, initialValue }) => {
   const inputEl = useRef(null);
   const listItemEl = useRef(null);
   const resultsEl = useRef(null);
 
   const [state, setState] = useState({
-    value: '',
+    value: initialValue ? initialValue : '',
     suggestions: suggestions,
     filteredList: [],
   });

@@ -7,7 +7,9 @@ import { INITIAL_EVENTS } from './data/events';
 import resources from './data/resources';
 import resourceContent from './components/ResourceContent';
 import renderEventContent from './components/RenderEventContent';
+import { services } from './data/services';
 import NewAppointmentBubble from './components/NewAppointmentBubble';
+import EditAppointmentBubble from './components/EditAppointmentBubble';
 
 import './App.css';
 
@@ -16,7 +18,9 @@ class App extends Component {
     super(props);
 
     this.state = {
+      showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
+      selectedEvent: null,
       selectInfo: null,
     }
 
@@ -30,10 +34,41 @@ class App extends Component {
     });
   }
 
+  handleEventClick = ({event}) => {
+    let { extendedProps, title } = event,
+      { customer } = extendedProps;
+
+    let eventResource = event.getResources()[0];
+    let customerName = `${customer.firstName} ${customer.lastName}`;
+    let selectedService = services.find(serv => serv.name === title);
+
+    let selectInfo = {
+      customer: customer,
+      customerName: customerName,
+      resourceId: eventResource.id,
+      resourceTitle: eventResource.title,
+      selectedServiceId: selectedService.id,
+    }
+
+    this.setState({
+      ...this.state,
+      event: event,
+      showEditAppointmentBubble: true,
+      selectInfo: selectInfo,
+    })
+  }
+
   toggleNewAppointment = () => {
     this.setState({
       ...this.state,
       showNewAppointmentBubble: !this.state.showNewAppointmentBubble
+    })
+  }
+
+  toggleEditAppointment = () => {
+    this.setState({
+      ...this.state,
+      showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
     })
   }
 
@@ -76,6 +111,7 @@ class App extends Component {
             eventContent={renderEventContent}
             customButtons={this.customButtons}
             headerToolbar={this.headerToolbar}
+            eventClick={this.handleEventClick}
             ref={this.calendarRef}
           />
 
@@ -84,6 +120,14 @@ class App extends Component {
               selectInfo={this.state.selectInfo}
               calendarRef={this.calendarRef.current.getApi()}
               toggleNewAppointment={this.toggleNewAppointment}
+            />
+          )}
+
+          {this.state.showEditAppointmentBubble && (
+            <EditAppointmentBubble
+              selectInfo={this.state.selectInfo}
+              event={this.state.event}
+              toggleEditAppointment={this.toggleEditAppointment}
             />
           )}
         </main>
