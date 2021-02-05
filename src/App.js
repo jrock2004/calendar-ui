@@ -2,8 +2,9 @@ import { Component, createRef } from 'react';
 import FullCalendar from '@fullcalendar/react'
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import addMinutes from 'date-fns/addMinutes';
 
-import { INITIAL_EVENTS } from './data/events';
+import { createEventId, INITIAL_EVENTS } from './data/events';
 import resources from './data/resources';
 import { services } from './data/services';
 
@@ -19,8 +20,16 @@ class App extends Component {
 
     this.state = {
       calendarApi: null,
+      currentEvents: [],
+      customerName: '',
+      employeeId: null,
+      employeeName: null,
       resources: resources,
+      selectedCustomer: null,
       selectInfo: null,
+      selectedEvent: null,
+      selectedService: null,
+      selectedServiceId: null,
       showNewAppointmentBubble: false,
     }
 
@@ -32,6 +41,9 @@ class App extends Component {
 
     this.setState({
       calendarApi: view.calendar,
+      employeeId: resource.id,
+      employeeName: resource.title,
+      showEditAppointmentBubble: false,
       showNewAppointmentBubble: true,
       selectInfo: {
         ...this.state.selectInfo,
@@ -69,17 +81,112 @@ class App extends Component {
     this.setState({
       ...this.state,
       calendarApi: this.calendarRef,
+      customerName: customerName,
+      employeeId: eventResource.id,
+      employeeName: eventResource.title,
+      end: end,
+      selectedEvent: event,
+      selectedServiceId: selectedService.id,
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
-      selectInfo: {
-        ...this.state.selectInfo,
-        customerName: customerName,
-        end: end,
-        employeeId: eventResource.id,
-        employeeName: eventResource.title,
-        selectedServiceId: selectedService.id,
-        start: start,
-      }
+      start: start,
+    })
+  }
+
+  handleEmployeeChange = (event) => {
+    const value = event.target.value;
+    const resource = resources.find(res => res.id === value);
+
+    this.setState({
+      ...this.state,
+      employeeId: resource.id,
+      employeeName: resource.title,
+    })
+  }
+
+  handleChange = (event) => {
+    if (event && event.lastName) {
+      let name = `${event.firstName} ${event.lastName}`
+
+      this.setState({
+        ...this.state,
+        customerName: name,
+        selectedCustomer: event,
+      })
+    } else if(event && event.target.name === 'selectedServiceId' && !this.state.calendarApi.current) {
+      let service = services.find(serv => serv.id === event.target.value),
+        calendarApi = this.state.calendarApi,
+        date = this.state.calendarApi.getDate();
+
+      date.setHours(this.state.selectInfo.start.getHours());
+      date.setMinutes(this.state.selectInfo.start.getMinutes());
+
+      let startTime = calendarApi.formatIso(date);
+      let endTime = calendarApi.formatIso(addMinutes(date, service.duration));
+
+      this.setState({
+        ...this.state,
+        [event.target.name]: event.target.value,
+        endTime: endTime,
+        startTime: startTime,
+      });
+    } else {
+      this.setState({
+        ...this.state,
+        [event.target.name]: event.target.value
+      });
+    }
+  }
+
+  handleSubmit = (ev) => {
+    ev.preventDefault();
+
+    let {
+      calendarApi,
+      customerName,
+      employeeId,
+      endTime,
+      selectedEvent,
+      selectedCustomer,
+      selectedServiceId,
+      startTime
+    } = this.state,
+      service = services.find(serv => serv.id === selectedServiceId);
+
+
+    if (selectedEvent) {
+      alert('Currently we only support updating employee and service');
+      // selectedEvent.setExtendedProp('customer', {
+      //   ...selectedCustomer
+      // })
+      selectedEvent.setProp('title', service.name)
+      selectedEvent.setResources([employeeId])
+
+      this.toggleEditAppointment();
+    } else {
+      calendarApi.unselect();
+
+      calendarApi.addEvent({
+        id: createEventId(),
+        title: service.name,
+        start: startTime,
+        end: endTime,
+        resourceId: employeeId,
+        customer: {
+          ...selectedCustomer,
+          fullName: customerName
+        }
+      });
+
+      this.toggleNewAppointment();
+    }
+
+  }
+
+  handleEvents = (events) => {
+    this.setState({
+      ...this.state,
+      currentEvents: events,
     })
   }
 
@@ -94,6 +201,7 @@ class App extends Component {
             allDaySlot={false}
             editable={true}
             eventClick={this.handleEventClick}
+            eventChange={this.handleEventChange}
             eventContent={renderEventContent}
             initialEvents={INITIAL_EVENTS}
             initialView="resourceTimeGridDay"
@@ -113,14 +221,16 @@ class App extends Component {
           {this.state.showNewAppointmentBubble && (
             <BubbleContainer
               submitButtonText="Book"
-              title={`New Appointment with ${this.state.selectInfo.employeeName}`}
+              title={`New Appointment with ${this.state.employeeName}`}
               toggleBubble={this.toggleNewAppointment}
+              handleSubmit={this.handleSubmit}
             >
               <AppointmentWrapper
-                employeeId={this.state.selectInfo.employeeId}
-                employeeName={this.state.selectInfo.employeeName}
-                end={this.state.selectInfo.end}
-                start={this.state.selectInfo.start}
+                employeeId={this.state.employeeId}
+                end={this.state.endTime}
+                handleChange={this.handleChange}
+                handleEmployeeChange={this.handleEmployeeChange}
+                start={this.state.startTime}
               />
             </BubbleContainer>
           )}
@@ -130,14 +240,18 @@ class App extends Component {
               submitButtonText="Update"
               title="Edit Appointment"
               toggleBubble={this.toggleEditAppointment}
+              handleSubmit={this.handleSubmit}
             >
               <AppointmentWrapper
-                customerName={this.state.selectInfo.customerName}
-                employeeId={this.state.selectInfo.employeeId}
-                employeeName={this.state.selectInfo.employeeName}
-                end={this.state.selectInfo.end}
-                selectedServiceId={this.state.selectInfo.selectedServiceId}
-                start={this.state.selectInfo.start}
+                employeeId={this.state.employeeId}
+                end={this.state.endTime}
+                handleChange={this.handleChange}
+                handleEmployeeChange={this.handleEmployeeChange}
+                start={this.state.startTime}
+
+                customerName={this.state.customerName}
+                employeeName={this.state.employeeName}
+                selectedServiceId={this.state.selectedServiceId}
               />
             </BubbleContainer>
           )}

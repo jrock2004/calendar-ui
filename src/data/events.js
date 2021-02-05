@@ -1,5 +1,7 @@
+import { format } from 'date-fns'
+
 let eventGuid = 0;
-let todayStr = new Date().toISOString().replace(/T.*$/, '');
+let todayStr = format(new Date(), 'yyyy-MM-dd')
 
 export const INITIAL_EVENTS = [
   {
@@ -16,12 +18,11 @@ export const INITIAL_EVENTS = [
       phone: '7165551234',
       fullName: 'Han Solo',
     }
-
   },
   {
     id: `event-${createEventId()}`,
     resourceId: "resource-2",
-    title: "Haircut",
+    title: "Massage",
     start: todayStr + 'T09:00:00',
     end: todayStr + 'T10:00:00',
     customer: {
@@ -31,6 +32,21 @@ export const INITIAL_EVENTS = [
       email: 'luke.skywalker@test.com',
       phone: '7165555678',
       fullName: 'Luke Skywalker',
+    }
+  },
+  {
+    id: `event-${createEventId()}`,
+    resourceId: "resource-3",
+    title: "Haircut",
+    start: todayStr + 'T12:00:00',
+    end: todayStr + 'T12:30:00',
+    customer: {
+      id: 'customer-2',
+      firstName: 'Emperor',
+      lastName: 'Palpatine',
+      email: 'emperor.palpatine@test.com',
+      phone: '7025559876',
+      fullName: 'Emperor Palpatine',
     }
   },
 ]

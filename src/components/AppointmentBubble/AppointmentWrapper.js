@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import { customers } from '../../data/customers';
 import { resources } from '../../data/resources';
@@ -8,54 +8,17 @@ import { InputSuggest } from '../inputSuggest/InputSuggest';
 import { UiSelect } from '../UiSelect';
 import { GetAppointmentTime } from './GetAppointmentTime';
 
-export const AppointmentWrapper = ({customerName, employeeId, employeeName, end, selectedServiceId, start}) => {
-  const [state, setState] = useState({
-    customerName: customerName,
-    employeeId: employeeId,
-    employeeName: employeeName,
-    end: end,
-    employeeId: employeeId,
-    employeeName: employeeName,
-    selectedCustomer: null,
-    selectedServiceId: selectedServiceId,
-    start: start
-  });
-
-  const handleSelectCustomer = (item) => {
-    const customerName = `${item.firstName} ${item.lastName}`;
-
-    setState({
-      ...state,
-      selectedCustomer: item,
-      customerName: customerName,
-    });
-  }
-
-  const handleChange = (event) => {
-    setState({
-      ...state,
-      [event.target.name]: event.target.value
-    });
-  }
-
-  const handleEmployeeChange = (event) => {
-    const value = event.target.value;
-    const resource = resources.find(res => res.id === value);
-
-    setState({
-      ...state,
-      employeeId: resource.id,
-      employeeName: `with ${resource.title}`,
-    })
-  }
+export const AppointmentWrapper = ({customerName, employeeId, end, selectedServiceId, start, handleChange, handleEmployeeChange}) => {
 
   return (
     <div>
-      <GetAppointmentTime end={state.end} start={state.start} />
+      {(start && end) && (
+        <GetAppointmentTime end={end} start={start} />
+      )}
 
       <InputSuggest
-        initialValue={state.customerName}
-        handleClick={handleSelectCustomer}
+        initialValue={customerName}
+        handleClick={handleChange}
         label="Customer Name"
         suggestions={customers}
       />
@@ -63,7 +26,7 @@ export const AppointmentWrapper = ({customerName, employeeId, employeeName, end,
       <UiSelect
         name="selectedServiceId"
         label="Choose a service"
-        value={state.selectedServiceId}
+        value={selectedServiceId}
         handleChange={handleChange}
       >
         <option>Please select a service</option>
@@ -75,7 +38,7 @@ export const AppointmentWrapper = ({customerName, employeeId, employeeName, end,
       <UiSelect
         name="employeeId"
         label="Choose a employee"
-        value={state.employeeId}
+        value={employeeId}
         handleChange={handleEmployeeChange}
       >
         <option>Please select a employee</option>

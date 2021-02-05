@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 
-export const BubbleContainer = ({children, submitButtonText, title, toggleBubble}) => {
+export const BubbleContainer = ({children, handleSubmit, submitButtonText, title, toggleBubble}) => {
   const [bubble, setBubble] = useState({
-    submitButtonText: submitButtonText,
-    title: title,
     isExpanded: false
   });
 
@@ -21,9 +19,9 @@ export const BubbleContainer = ({children, submitButtonText, title, toggleBubble
   }
 
   return (
-    <form className={getCssClass()}>
+    <form className={getCssClass()} onSubmit={handleSubmit}>
       <header className="bg-black text-white px-4 py-2 flex justify-between items-center">
-        <h4>{bubble.title}</h4>
+        <h4>{title}</h4>
         <div>
           <button type="button" onClick={handleExpand}>
             <svg className="w-6 h-6 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
@@ -41,7 +39,7 @@ export const BubbleContainer = ({children, submitButtonText, title, toggleBubble
           type="submit"
           className="border rounded-sm bg-teal-400 text-white text-xl uppercase x-4 py-2 w-full"
         >
-          {bubble.submitButtonText}
+          {submitButtonText}
         </button>
       </footer>
     </form>
