@@ -1,7 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 
-export const GetAppointmentTime = ({end, start}) => {
+export const GetAppointmentTime = ({ end, start }) => {
   let startDate = new Date(start),
     endDate = new Date(end);
 
@@ -13,7 +13,7 @@ export const GetAppointmentTime = ({end, start}) => {
       <span className="font-semibold">End Time: </span>
       <span>{format(endDate, 'hh:mm aaa')}</span>
     </div>
-  )
-}
+  );
+};
 
 export default GetAppointmentTime;

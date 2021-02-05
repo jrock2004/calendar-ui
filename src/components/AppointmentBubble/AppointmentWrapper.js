@@ -8,13 +8,18 @@ import { InputSuggest } from '../inputSuggest/InputSuggest';
 import { UiSelect } from '../UiSelect';
 import { GetAppointmentTime } from './GetAppointmentTime';
 
-export const AppointmentWrapper = ({customerName, employeeId, end, selectedServiceId, start, handleChange, handleEmployeeChange}) => {
-
+export const AppointmentWrapper = ({
+  customerName,
+  employeeId,
+  end,
+  selectedServiceId,
+  start,
+  handleChange,
+  handleEmployeeChange,
+}) => {
   return (
     <div>
-      {(start && end) && (
-        <GetAppointmentTime end={end} start={start} />
-      )}
+      {start && end && <GetAppointmentTime end={end} start={start} />}
 
       <InputSuggest
         initialValue={customerName}
@@ -30,9 +35,11 @@ export const AppointmentWrapper = ({customerName, employeeId, end, selectedServi
         handleChange={handleChange}
       >
         <option>Please select a service</option>
-        {services.map(service =>
-          <option key={service.id} value={service.id}>{service.name}</option>
-        )}
+        {services.map((service) => (
+          <option key={service.id} value={service.id}>
+            {service.name}
+          </option>
+        ))}
       </UiSelect>
 
       <UiSelect
@@ -42,12 +49,14 @@ export const AppointmentWrapper = ({customerName, employeeId, end, selectedServi
         handleChange={handleEmployeeChange}
       >
         <option>Please select a employee</option>
-        {resources.map(resource =>
-          <option key={resource.id} value={resource.id}>{resource.title}</option>
-        )}
+        {resources.map((resource) => (
+          <option key={resource.id} value={resource.id}>
+            {resource.title}
+          </option>
+        ))}
       </UiSelect>
     </div>
-  )
-}
+  );
+};
 
 export default AppointmentWrapper;

@@ -146,6 +146,7 @@ export const InputSuggest = ({ label, suggestions, handleClick, initialValue }) 
 };
 
 InputSuggest.propTypes = {
+  initialValue: PropTypes.string,
   label: PropTypes.string,
   suggestions: PropTypes.array,
   handleClick: PropTypes.func,
