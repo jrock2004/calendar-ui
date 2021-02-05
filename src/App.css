@@ -6,3 +6,9 @@
   min-height: 87.5%;
   z-index: 100;
 }
+
+button svg g:not([fill~="#"]),
+button svg path:not([fill~="#"]),
+button svg use:not([fill~="#"]) {
+    fill: #ffffff;
+}

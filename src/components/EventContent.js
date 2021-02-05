@@ -1,30 +1,43 @@
 import React from 'react';
+import { Text } from '@mbkit/typography';
 
 export const EventContent = ({ distance, timeText, customerName, title }) => {
   if (distance <= 15) {
     return (
       <div className="flex justify-between px-4">
-        <span className="text-sm">{timeText}</span>
-        <span className="font-semibold hidden">{customerName}</span>
-        <span className="text-sm">{title}</span>
+        <Text color="white">{timeText}</Text>
+        <Text color="white" className="hidden">
+          {customerName}
+        </Text>
+        <Text color="white" size={5}>
+          {title}
+        </Text>
       </div>
     );
   } else if (distance <= 30) {
     return (
       <div className="flex flex-col">
         <div className="flex justify-between">
-          <span className="text-sm">{timeText}</span>
-          <span className="font-semibold mr-4">{customerName}</span>
+          <Text color="white">{timeText}</Text>
+          <Text color="white" size={5}>
+            {customerName}
+          </Text>
         </div>
-        <span className="text-sm">{title}</span>
+        <Text color="white" size={5}>
+          {title}
+        </Text>
       </div>
     );
   } else {
     return (
       <div className="flex flex-col">
-        <span className="text-sm mb-2">{timeText}</span>
-        <span className="font-semibold">{customerName}</span>
-        <span className="text-sm">{title}</span>
+        <Text color="white">{timeText}</Text>
+        <Text color="white" size="5">
+          {customerName}
+        </Text>
+        <Text color="white" size={5}>
+          {title}
+        </Text>
       </div>
     );
   }

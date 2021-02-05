@@ -63,9 +63,9 @@ export const AppointmentWrapper = ({
 AppointmentWrapper.propTypes = {
   customerName: PropTypes.string,
   employeeId: PropTypes.string,
-  end: PropTypes.string,
+  end: PropTypes.instanceOf(Date),
   selectedServiceId: PropTypes.string,
-  start: PropTypes.string,
+  start: PropTypes.instanceOf(Date),
   handleChange: PropTypes.func,
   handleEmployeeChange: PropTypes.func,
 };
