@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const UiSelect = ({ name, label, value, handleChange, children }) => {
   return (
@@ -28,6 +29,14 @@ export const UiSelect = ({ name, label, value, handleChange, children }) => {
       </div>
     </div>
   );
+};
+
+UiSelect.propTypes = {
+  children: PropTypes.element,
+  handleChange: PropTypes.func,
+  label: PropTypes.string,
+  name: PropTypes.string,
+  value: PropTypes.string,
 };
 
 export default UiSelect;

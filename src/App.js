@@ -1,4 +1,4 @@
-import { Component, createRef } from 'react';
+import React, { Component, createRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';

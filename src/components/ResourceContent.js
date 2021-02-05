@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const ResourceContent = ({ resource }) => {
   const { title, extendedProps } = resource;
@@ -12,6 +13,10 @@ export const ResourceContent = ({ resource }) => {
       <h2>{title}</h2>
     </div>
   );
+};
+
+ResourceContent.propTypes = {
+  resource: PropTypes.object,
 };
 
 export default ResourceContent;

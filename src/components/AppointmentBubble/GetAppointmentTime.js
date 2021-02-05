@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { format } from 'date-fns';
 
 export const GetAppointmentTime = ({ end, start }) => {
@@ -14,6 +15,11 @@ export const GetAppointmentTime = ({ end, start }) => {
       <span>{format(endDate, 'hh:mm aaa')}</span>
     </div>
   );
+};
+
+GetAppointmentTime.propTypes = {
+  end: PropTypes.string,
+  start: PropTypes.string,
 };
 
 export default GetAppointmentTime;

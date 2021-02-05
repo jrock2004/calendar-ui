@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 
 export const BubbleContainer = ({
   children,
@@ -74,6 +75,14 @@ export const BubbleContainer = ({
       </footer>
     </form>
   );
+};
+
+BubbleContainer.propTypes = {
+  children: PropTypes.element,
+  handleSubmit: PropTypes.func,
+  submitButtonText: PropTypes.string,
+  title: PropTypes.string,
+  toggleBubble: PropTypes.func,
 };
 
 export default BubbleContainer;

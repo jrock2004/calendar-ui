@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import { customers } from '../../data/customers';
 import { resources } from '../../data/resources';
@@ -57,6 +58,16 @@ export const AppointmentWrapper = ({
       </UiSelect>
     </div>
   );
+};
+
+AppointmentWrapper.propTypes = {
+  customerName: PropTypes.string,
+  employeeId: PropTypes.string,
+  end: PropTypes.string,
+  selectedServiceId: PropTypes.string,
+  start: PropTypes.string,
+  handleChange: PropTypes.func,
+  handleEmployeeChange: PropTypes.func,
 };
 
 export default AppointmentWrapper;

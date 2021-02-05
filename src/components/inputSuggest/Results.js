@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const Results = ({ listItems, resultsEl }) => {
   return (
@@ -13,6 +14,11 @@ export const Results = ({ listItems, resultsEl }) => {
       </ul>
     </div>
   );
+};
+
+Results.propTypes = {
+  listItems: PropTypes.array,
+  resultsEl: PropTypes.element,
 };
 
 export default Results;
