@@ -1,5 +1,5 @@
-import { Component, createRef } from 'react';
-import FullCalendar from '@fullcalendar/react'
+import React, { Component, createRef } from 'react';
+import FullCalendar from '@fullcalendar/react';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import addMinutes from 'date-fns/addMinutes';
@@ -14,6 +14,7 @@ import BubbleContainer from './components/BubbleContainer';
 import AppointmentWrapper from './components/AppointmentBubble/AppointmentWrapper';
 
 import './App.css';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -32,7 +33,7 @@ class App extends Component {
       selectedServiceId: null,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
-    }
+    };
 
     this.calendarRef = createRef();
   }
@@ -52,31 +53,31 @@ class App extends Component {
         employeeId: resource.id,
         employeeName: resource.title,
         start: start,
-      }
+      },
     });
-  }
+  };
 
   toggleNewAppointment = () => {
     this.setState({
       ...this.state,
       showEditAppointmentBubble: false,
-      showNewAppointmentBubble: !this.state.showNewAppointmentBubble
-    })
-  }
+      showNewAppointmentBubble: !this.state.showNewAppointmentBubble,
+    });
+  };
 
   toggleEditAppointment = () => {
     this.setState({
       ...this.state,
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
-    })
-  }
+    });
+  };
 
-  handleEventClick = ({event}) => {
+  handleEventClick = ({ event }) => {
     let { end, extendedProps, start, title } = event,
       { customer } = extendedProps,
       customerName = `${customer.firstName} ${customer.lastName}`,
-      selectedService = services.find(serv => serv.name === title),
+      selectedService = services.find((serv) => serv.name === title),
       eventResource = event.getResources()[0];
 
     this.setState({
@@ -91,31 +92,35 @@ class App extends Component {
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
       start: start,
-    })
-  }
+    });
+  };
 
   handleEmployeeChange = (event) => {
     const value = event.target.value;
-    const resource = resources.find(res => res.id === value);
+    const resource = resources.find((res) => res.id === value);
 
     this.setState({
       ...this.state,
       employeeId: resource.id,
       employeeName: resource.title,
-    })
-  }
+    });
+  };
 
   handleChange = (event) => {
     if (event && event.lastName) {
-      let name = `${event.firstName} ${event.lastName}`
+      let name = `${event.firstName} ${event.lastName}`;
 
       this.setState({
         ...this.state,
         customerName: name,
         selectedCustomer: event,
-      })
-    } else if(event && event.target.name === 'selectedServiceId' && !this.state.calendarApi.current) {
-      let service = services.find(serv => serv.id === event.target.value),
+      });
+    } else if (
+      event &&
+      event.target.name === 'selectedServiceId' &&
+      !this.state.calendarApi.current
+    ) {
+      let service = services.find((serv) => serv.id === event.target.value),
         calendarApi = this.state.calendarApi,
         date = this.state.calendarApi.getDate();
 
@@ -134,33 +139,33 @@ class App extends Component {
     } else {
       this.setState({
         ...this.state,
-        [event.target.name]: event.target.value
+        [event.target.name]: event.target.value,
       });
     }
-  }
+  };
 
   handleSubmit = (ev) => {
     ev.preventDefault();
 
     let {
-      calendarApi,
-      customerName,
-      employeeId,
-      endTime,
-      selectedEvent,
-      selectedCustomer,
-      selectedServiceId,
-      startTime
-    } = this.state,
-      service = services.find(serv => serv.id === selectedServiceId);
+        calendarApi,
+        customerName,
+        employeeId,
+        endTime,
+        selectedEvent,
+        selectedCustomer,
+        selectedServiceId,
+        startTime,
+      } = this.state,
+      service = services.find((serv) => serv.id === selectedServiceId);
 
     if (selectedEvent) {
       // alert('Currently we only support updating employee and service');
       // selectedEvent.setExtendedProp('customer', {
       //   ...selectedCustomer
       // })
-      selectedEvent.setProp('title', service.name)
-      selectedEvent.setResources([employeeId])
+      selectedEvent.setProp('title', service.name);
+      selectedEvent.setResources([employeeId]);
     } else {
       calendarApi.unselect();
 
@@ -172,8 +177,8 @@ class App extends Component {
         resourceId: employeeId,
         customer: {
           ...selectedCustomer,
-          fullName: customerName
-        }
+          fullName: customerName,
+        },
       });
     }
 
@@ -190,15 +195,15 @@ class App extends Component {
       selectedServiceId: null,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
-    })
-  }
+    });
+  };
 
   handleEvents = (events) => {
     this.setState({
       ...this.state,
       currentEvents: events,
-    })
-  }
+    });
+  };
 
   render() {
     return (
@@ -258,7 +263,6 @@ class App extends Component {
                 handleChange={this.handleChange}
                 handleEmployeeChange={this.handleEmployeeChange}
                 start={this.state.startTime}
-
                 customerName={this.state.customerName}
                 employeeName={this.state.employeeName}
                 selectedServiceId={this.state.selectedServiceId}
@@ -267,7 +271,7 @@ class App extends Component {
           )}
         </main>
       </>
-    )
+    );
   }
 }
 
