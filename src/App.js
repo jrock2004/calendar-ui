@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import addMinutes from 'date-fns/addMinutes';
+import { Heading } from '@mbkit/typography';
 
 import { createEventId, INITIAL_EVENTS } from './data/events';
 import resources from './data/resources';
@@ -25,6 +26,7 @@ class App extends Component {
       customerName: '',
       employeeId: null,
       employeeName: null,
+      endTime: null,
       resources: resources,
       selectedCustomer: null,
       selectInfo: null,
@@ -33,6 +35,7 @@ class App extends Component {
       selectedServiceId: null,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
+      startTime: null,
     };
 
     this.calendarRef = createRef();
@@ -45,15 +48,17 @@ class App extends Component {
       calendarApi: view.calendar,
       employeeId: resource.id,
       employeeName: resource.title,
+      endTime: end,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: true,
-      selectInfo: {
-        ...this.state.selectInfo,
-        end: end,
-        employeeId: resource.id,
-        employeeName: resource.title,
-        start: start,
-      },
+      startTime: start,
+      // selectInfo: {
+      //   ...this.state.selectInfo,
+      //   end: end,
+      //   employeeId: resource.id,
+      //   employeeName: resource.title,
+      //   start: start,
+      // },
     });
   };
 
@@ -86,12 +91,12 @@ class App extends Component {
       customerName: customerName,
       employeeId: eventResource.id,
       employeeName: eventResource.title,
-      end: end,
+      endTime: end,
       selectedEvent: event,
       selectedServiceId: selectedService.id,
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
-      start: start,
+      startTime: start,
     });
   };
 
@@ -115,27 +120,29 @@ class App extends Component {
         customerName: name,
         selectedCustomer: event,
       });
-    } else if (
-      event &&
-      event.target.name === 'selectedServiceId' &&
-      !this.state.calendarApi.current
-    ) {
+    } else if (event && event.target.name === 'selectedServiceId') {
       let service = services.find((serv) => serv.id === event.target.value),
-        calendarApi = this.state.calendarApi,
-        date = this.state.calendarApi.getDate();
+        // calendarApi = this.calendarRef.current.getApi(),
+        date = this.state.startTime;
 
-      date.setHours(this.state.selectInfo.start.getHours());
-      date.setMinutes(this.state.selectInfo.start.getMinutes());
+      if (service) {
+        let startTime = new Date(date.setHours(this.state.startTime.getHours()));
+        let endTime = new Date(date.setMinutes(this.state.startTime.getMinutes()));
 
-      let startTime = calendarApi.formatIso(date);
-      let endTime = calendarApi.formatIso(addMinutes(date, service.duration));
+        endTime = addMinutes(endTime, service.duration);
 
-      this.setState({
-        ...this.state,
-        [event.target.name]: event.target.value,
-        endTime: endTime,
-        startTime: startTime,
-      });
+        // let startTime = calendarApi.formatIso(date);
+        // let endTime = calendarApi.formatIso(addMinutes(date, service.duration));
+
+        this.setState({
+          ...this.state,
+          [event.target.name]: event.target.value,
+          endTime: endTime,
+          startTime: startTime,
+        });
+      } else {
+        alert('Known Bug');
+      }
     } else {
       this.setState({
         ...this.state,
@@ -209,7 +216,9 @@ class App extends Component {
     return (
       <>
         <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
-          <h1 className="text-2xl">Scheduling</h1>
+          <Heading as="h1" color="primary">
+            Scheduling
+          </Heading>
         </header>
         <main className="px-6 pt-4">
           <FullCalendar

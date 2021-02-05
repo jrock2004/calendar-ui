@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Input } from '@mbkit/input';
+import { Label } from '@mbkit/label';
 
 import ListItem from './ListItem';
 import Results from './Results';
@@ -129,16 +131,8 @@ export const InputSuggest = ({ label, suggestions, handleClick, initialValue }) 
 
   return (
     <div className="flex flex-col mb-4">
-      <label id="suggest-label" className="text-sm leading-5 font-medium text-gray-700">
-        {label}
-      </label>
-      <input
-        className="border rounded-sm px-3 py-1 mt-1 shadow-sm"
-        ref={inputEl}
-        value={state.value}
-        onFocus={handleFocus}
-        onChange={handleChange}
-      />
+      <Label id="suggest-label">{label}</Label>
+      <Input ref={inputEl} value={state.value} onChange={handleChange} onFocus={handleFocus} />
 
       <ResultsList />
     </div>

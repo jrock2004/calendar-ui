@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Heading } from '@mbkit/typography';
 
 export const ResourceContent = ({ resource }) => {
   const { title, extendedProps } = resource;
@@ -10,7 +11,7 @@ export const ResourceContent = ({ resource }) => {
       <div>
         <img src={image} alt={title} className="w-8 rounded-full mr-3" />
       </div>
-      <h2>{title}</h2>
+      <Heading as="h5">{title}</Heading>
     </div>
   );
 };
