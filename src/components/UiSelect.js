@@ -32,7 +32,7 @@ export const UiSelect = ({ name, label, value, handleChange, children }) => {
 };
 
 UiSelect.propTypes = {
-  children: PropTypes.element,
+  children: PropTypes.array,
   handleChange: PropTypes.func,
   label: PropTypes.string,
   name: PropTypes.string,

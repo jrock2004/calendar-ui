@@ -18,7 +18,7 @@ export const Results = ({ listItems, resultsEl }) => {
 
 Results.propTypes = {
   listItems: PropTypes.array,
-  resultsEl: PropTypes.element,
+  resultsEl: PropTypes.object,
 };
 
 export default Results;
