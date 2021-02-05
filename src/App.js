@@ -30,6 +30,7 @@ class App extends Component {
       selectedEvent: null,
       selectedService: null,
       selectedServiceId: null,
+      showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
     }
 
@@ -153,16 +154,13 @@ class App extends Component {
     } = this.state,
       service = services.find(serv => serv.id === selectedServiceId);
 
-
     if (selectedEvent) {
-      alert('Currently we only support updating employee and service');
+      // alert('Currently we only support updating employee and service');
       // selectedEvent.setExtendedProp('customer', {
       //   ...selectedCustomer
       // })
       selectedEvent.setProp('title', service.name)
       selectedEvent.setResources([employeeId])
-
-      this.toggleEditAppointment();
     } else {
       calendarApi.unselect();
 
@@ -177,10 +175,22 @@ class App extends Component {
           fullName: customerName
         }
       });
-
-      this.toggleNewAppointment();
     }
 
+    this.setState({
+      ...this.state,
+      calendarApi: null,
+      customerName: '',
+      employeeId: null,
+      employeeName: null,
+      selectedCustomer: null,
+      selectInfo: null,
+      selectedEvent: null,
+      selectedService: null,
+      selectedServiceId: null,
+      showEditAppointmentBubble: false,
+      showNewAppointmentBubble: false,
+    })
   }
 
   handleEvents = (events) => {
