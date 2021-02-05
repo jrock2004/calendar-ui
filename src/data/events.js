@@ -1,10 +1,11 @@
+import { format } from 'date-fns'
+
 let eventGuid = 0;
-let todayStr = new Date().toISOString().replace(/T.*$/, '');
+let todayStr = format(new Date(), 'yyyy-MM-dd')
 
 export const INITIAL_EVENTS = [
   {
     id: `event-${createEventId()}`,
-    // backgroundColor: "#fff",
     resourceId: "resource-1",
     title: "Trim",
     start: todayStr + 'T12:00:00',
@@ -17,13 +18,11 @@ export const INITIAL_EVENTS = [
       phone: '7165551234',
       fullName: 'Han Solo',
     }
-
   },
   {
     id: `event-${createEventId()}`,
-    // backgroundColor: "#fff",
     resourceId: "resource-2",
-    title: "Haircut",
+    title: "Massage",
     start: todayStr + 'T09:00:00',
     end: todayStr + 'T10:00:00',
     customer: {
@@ -37,7 +36,6 @@ export const INITIAL_EVENTS = [
   },
   {
     id: `event-${createEventId()}`,
-    // backgroundColor: "#fff",
     resourceId: "resource-3",
     title: "Haircut",
     start: todayStr + 'T12:00:00',

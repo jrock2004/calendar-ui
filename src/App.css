@@ -2,7 +2,7 @@
   --fc-today-bg-color: #fff;
 }
 
-.new-appointment {
+.bubble-container {
   min-height: 87.5%;
   z-index: 100;
 }
