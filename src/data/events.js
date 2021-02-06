@@ -25,6 +25,7 @@ export const INITIAL_EVENTS = [
     title: 'Massage',
     start: todayStr + 'T09:00:00',
     end: todayStr + 'T10:00:00',
+    notes: 'He likes his hair done a certain way',
     customer: {
       id: 'customer-1',
       firstName: 'Luke',

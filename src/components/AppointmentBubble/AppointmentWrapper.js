@@ -1,5 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Textarea } from '@mbkit/textarea';
+import { Label } from '@mbkit/label';
+import { IconClose, IconServices, IconCreditCard } from '@mbkit/icon';
+import { Button } from '@mbkit/button';
 
 import { customers } from '../../data/customers';
 import { resources } from '../../data/resources';
@@ -13,6 +17,8 @@ export const AppointmentWrapper = ({
   customerName,
   employeeId,
   end,
+  isEditAppointment,
+  notes,
   selectedServiceId,
   start,
   handleChange,
@@ -56,6 +62,32 @@ export const AppointmentWrapper = ({
           </option>
         ))}
       </UiSelect>
+
+      <div className="mt-4">
+        <Label>
+          Appointment Notes
+          <Textarea name="notes" value={notes} onChange={handleChange} />
+        </Label>
+      </div>
+
+      {isEditAppointment && (
+        <div className="mt-8 border-t pt-4">
+          <div className="grid grid-flow-col auto-cols-max gap-3">
+            <Button variant="tertiaryOutlined" size="4">
+              <IconCreditCard />
+              Take Payment
+            </Button>
+            <Button variant="tertiaryOutlined" size="4">
+              <IconServices />
+              Confirm
+            </Button>
+            <Button variant="tertiaryOutlined" size="4">
+              <IconClose />
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -64,6 +96,8 @@ AppointmentWrapper.propTypes = {
   customerName: PropTypes.string,
   employeeId: PropTypes.string,
   end: PropTypes.instanceOf(Date),
+  isEditAppointment: PropTypes.bool,
+  notes: PropTypes.string,
   selectedServiceId: PropTypes.string,
   start: PropTypes.instanceOf(Date),
   handleChange: PropTypes.func,
