@@ -4,6 +4,8 @@ import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import addMinutes from 'date-fns/addMinutes';
 import { Heading } from '@mbkit/typography';
+import { Toaster } from '@mbkit/toaster';
+import { IconClose } from '@mbkit/icon';
 
 import { createEventId, INITIAL_EVENTS } from './data/events';
 import resources from './data/resources';
@@ -27,6 +29,8 @@ class App extends Component {
       employeeId: null,
       employeeName: null,
       endTime: null,
+      isEditAppointment: false,
+      notes: '',
       resources: resources,
       selectedCustomer: null,
       selectInfo: null,
@@ -35,7 +39,9 @@ class App extends Component {
       selectedServiceId: null,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
+      showToast: false,
       startTime: null,
+      toastMessage: '',
     };
 
     this.calendarRef = createRef();
@@ -49,22 +55,17 @@ class App extends Component {
       employeeId: resource.id,
       employeeName: resource.title,
       endTime: end,
+      isEditAppointment: false,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: true,
       startTime: start,
-      // selectInfo: {
-      //   ...this.state.selectInfo,
-      //   end: end,
-      //   employeeId: resource.id,
-      //   employeeName: resource.title,
-      //   start: start,
-      // },
     });
   };
 
   toggleNewAppointment = () => {
     this.setState({
       ...this.state,
+      notes: '',
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: !this.state.showNewAppointmentBubble,
     });
@@ -73,6 +74,7 @@ class App extends Component {
   toggleEditAppointment = () => {
     this.setState({
       ...this.state,
+      notes: '',
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
     });
@@ -80,7 +82,7 @@ class App extends Component {
 
   handleEventClick = ({ event }) => {
     let { end, extendedProps, start, title } = event,
-      { customer } = extendedProps,
+      { customer, notes } = extendedProps,
       customerName = `${customer.firstName} ${customer.lastName}`,
       selectedService = services.find((serv) => serv.name === title),
       eventResource = event.getResources()[0];
@@ -92,6 +94,8 @@ class App extends Component {
       employeeId: eventResource.id,
       employeeName: eventResource.title,
       endTime: end,
+      isEditAppointment: true,
+      notes: notes,
       selectedEvent: event,
       selectedServiceId: selectedService.id,
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
@@ -131,9 +135,6 @@ class App extends Component {
 
         endTime = addMinutes(endTime, service.duration);
 
-        // let startTime = calendarApi.formatIso(date);
-        // let endTime = calendarApi.formatIso(addMinutes(date, service.duration));
-
         this.setState({
           ...this.state,
           [event.target.name]: event.target.value,
@@ -159,12 +160,14 @@ class App extends Component {
         customerName,
         employeeId,
         endTime,
+        notes,
         selectedEvent,
         selectedCustomer,
         selectedServiceId,
         startTime,
       } = this.state,
-      service = services.find((serv) => serv.id === selectedServiceId);
+      service = services.find((serv) => serv.id === selectedServiceId),
+      toastMessage = 'Appointment updated successfully';
 
     if (selectedEvent) {
       // alert('Currently we only support updating employee and service');
@@ -173,6 +176,7 @@ class App extends Component {
       // })
       selectedEvent.setProp('title', service.name);
       selectedEvent.setResources([employeeId]);
+      selectedEvent.setExtendedProp('notes', notes);
     } else {
       calendarApi.unselect();
 
@@ -187,6 +191,8 @@ class App extends Component {
           fullName: customerName,
         },
       });
+
+      toastMessage = 'Appointment created successfully';
     }
 
     this.setState({
@@ -195,6 +201,8 @@ class App extends Component {
       customerName: '',
       employeeId: null,
       employeeName: null,
+      isEditAppointment: false,
+      notes: '',
       selectedCustomer: null,
       selectInfo: null,
       selectedEvent: null,
@@ -202,6 +210,8 @@ class App extends Component {
       selectedServiceId: null,
       showEditAppointmentBubble: false,
       showNewAppointmentBubble: false,
+      showToast: true,
+      toastMessage: toastMessage,
     });
   };
 
@@ -209,6 +219,13 @@ class App extends Component {
     this.setState({
       ...this.state,
       currentEvents: events,
+    });
+  };
+
+  handleToastMessage = () => {
+    this.setState({
+      ...this.state,
+      showToast: false,
     });
   };
 
@@ -254,6 +271,8 @@ class App extends Component {
                 end={this.state.endTime}
                 handleChange={this.handleChange}
                 handleEmployeeChange={this.handleEmployeeChange}
+                isEditAppointment={this.state.isEditAppointment}
+                notes={this.state.notes}
                 start={this.state.startTime}
               />
             </BubbleContainer>
@@ -271,6 +290,8 @@ class App extends Component {
                 end={this.state.endTime}
                 handleChange={this.handleChange}
                 handleEmployeeChange={this.handleEmployeeChange}
+                isEditAppointment={this.state.isEditAppointment}
+                notes={this.state.notes}
                 start={this.state.startTime}
                 customerName={this.state.customerName}
                 employeeName={this.state.employeeName}
@@ -279,6 +300,23 @@ class App extends Component {
             </BubbleContainer>
           )}
         </main>
+        <Toaster
+          show={this.state.showToast}
+          style={{
+            zIndex: 1000,
+          }}
+        >
+          <div style={{ display: 'flex' }}>
+            {this.state.toastMessage}
+            <IconClose
+              onClick={this.handleToastMessage}
+              style={{
+                marginLeft: '15px',
+                marginTop: '-3px',
+              }}
+            />
+          </div>
+        </Toaster>
       </>
     );
   }

@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+
+
 :root {
   --fc-today-bg-color: #fff;
 }
@@ -9,6 +12,13 @@
 
 button svg g:not([fill~="#"]),
 button svg path:not([fill~="#"]),
-button svg use:not([fill~="#"]) {
-    fill: #ffffff;
+button svg use:not([fill~="#"]),
+div[class^="Toaster"] svg g:not([fill~="#"]),
+div[class^="Toaster"] svg path:not([fill~="#"]),
+div[class^="Toaster"] svg use:not([fill~="#"]) {
+  fill: #ffffff;
+}
+
+div[class^="Toaster"] svg:hover {
+  cursor: pointer;
 }

@@ -11,6 +11,8 @@
     "@mbkit/input": "^1.3.16",
     "@mbkit/label": "^1.3.16",
     "@mbkit/select": "^1.3.16",
+    "@mbkit/textarea": "^1.3.16",
+    "@mbkit/toaster": "^1.3.16",
     "@mbkit/typography": "^1.3.16",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.0",
