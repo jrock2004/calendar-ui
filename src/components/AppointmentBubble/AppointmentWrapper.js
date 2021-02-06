@@ -5,28 +5,27 @@ import { Label } from '@mbkit/label';
 import { IconClose, IconServices, IconCreditCard } from '@mbkit/icon';
 import { Button } from '@mbkit/button';
 
-import { customers } from '../../data/customers';
-import { resources } from '../../data/resources';
-import { services } from '../../data/services';
-
 import { InputSuggest } from '../inputSuggest/InputSuggest';
 import { UiSelect } from '../UiSelect';
 import { GetAppointmentTime } from './GetAppointmentTime';
 
 export const AppointmentWrapper = ({
-  customerName,
-  employeeId,
-  end,
+  customers,
+  employees,
   isEditAppointment,
-  notes,
-  selectedServiceId,
-  start,
+  selectedEvent,
+  services,
   handleChange,
-  handleEmployeeChange,
 }) => {
+  let showAppointmentTime = selectedEvent.end && selectedEvent.start;
+  let customer = customers.find((cs) => cs.id === selectedEvent.customerId) || '';
+  let customerName = customer !== '' ? `${customer.firstName} ${customer.lastName}` : '';
+
   return (
     <div>
-      {start && end && <GetAppointmentTime end={end} start={start} />}
+      {showAppointmentTime && (
+        <GetAppointmentTime end={selectedEvent.end} start={selectedEvent.start} />
+      )}
 
       <InputSuggest
         initialValue={customerName}
@@ -36,9 +35,9 @@ export const AppointmentWrapper = ({
       />
 
       <UiSelect
-        name="selectedServiceId"
+        name="serviceId"
         label="Choose a service"
-        value={selectedServiceId}
+        value={selectedEvent.serviceId}
         handleChange={handleChange}
       >
         <option>Please select a service</option>
@@ -52,11 +51,11 @@ export const AppointmentWrapper = ({
       <UiSelect
         name="employeeId"
         label="Choose a employee"
-        value={employeeId}
-        handleChange={handleEmployeeChange}
+        value={selectedEvent.employeeId}
+        handleChange={handleChange}
       >
         <option>Please select a employee</option>
-        {resources.map((resource) => (
+        {employees.map((resource) => (
           <option key={resource.id} value={resource.id}>
             {resource.title}
           </option>
@@ -66,7 +65,7 @@ export const AppointmentWrapper = ({
       <div className="mt-4">
         <Label>
           Appointment Notes
-          <Textarea name="notes" value={notes} onChange={handleChange} />
+          <Textarea name="notes" value={selectedEvent.notes} onChange={handleChange} />
         </Label>
       </div>
 
@@ -93,15 +92,12 @@ export const AppointmentWrapper = ({
 };
 
 AppointmentWrapper.propTypes = {
-  customerName: PropTypes.string,
-  employeeId: PropTypes.string,
-  end: PropTypes.instanceOf(Date),
-  isEditAppointment: PropTypes.bool,
-  notes: PropTypes.string,
-  selectedServiceId: PropTypes.string,
-  start: PropTypes.instanceOf(Date),
+  customers: PropTypes.array,
+  employees: PropTypes.array,
   handleChange: PropTypes.func,
-  handleEmployeeChange: PropTypes.func,
+  isEditAppointment: PropTypes.bool,
+  selectedEvent: PropTypes.object,
+  services: PropTypes.array,
 };
 
 export default AppointmentWrapper;
