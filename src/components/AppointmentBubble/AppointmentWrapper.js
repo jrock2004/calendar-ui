@@ -18,7 +18,7 @@ export const AppointmentWrapper = ({
   handleChange,
 }) => {
   let showAppointmentTime = selectedEvent.end && selectedEvent.start;
-  let customer = customers.find((cs) => cs.id === selectedEvent.customerId) || '';
+  let customer = customers.find((cs) => cs.id === +selectedEvent.customerId) || '';
   let customerName = customer !== '' ? `${customer.firstName} ${customer.lastName}` : '';
 
   return (
@@ -37,7 +37,7 @@ export const AppointmentWrapper = ({
       <UiSelect
         name="serviceId"
         label="Choose a service"
-        value={selectedEvent.serviceId}
+        value={selectedEvent.serviceId.toString()}
         handleChange={handleChange}
       >
         <option>Please select a service</option>
@@ -51,7 +51,7 @@ export const AppointmentWrapper = ({
       <UiSelect
         name="employeeId"
         label="Choose a employee"
-        value={selectedEvent.employeeId}
+        value={selectedEvent.employeeId.toString()}
         handleChange={handleChange}
       >
         <option>Please select a employee</option>

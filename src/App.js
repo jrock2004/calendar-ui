@@ -68,12 +68,48 @@ const App = () => {
     requestResources('events');
   }, []);
 
-  console.log('App is Rendered');
+  let resetSelectedEvent = () => {
+    setSelectedEvent({
+      customerId: null,
+      employeeId: '',
+      employeeName: '',
+      end: null,
+      endStr: null,
+      eventId: null,
+      notes: '',
+      serviceId: '',
+      start: null,
+      startStr: null,
+    });
+  };
 
   let toggleNewAppointment = () => {
+    let { showNewAppointmentBubble } = bubble;
+
+    // If we are closing the bubble, clear out old values
+    if (showNewAppointmentBubble) {
+      resetSelectedEvent();
+    }
+
     setBubble({
       ...bubble,
-      showNewAppointmentBubble: !bubble.showNewAppointmentBubble,
+      showEditAppointmentBubble: false,
+      showNewAppointmentBubble: !showNewAppointmentBubble,
+    });
+  };
+
+  let toggleEditAppointment = () => {
+    let { showEditAppointmentBubble } = bubble;
+
+    // If we are closing the bubble, clear out old values
+    if (showEditAppointmentBubble) {
+      resetSelectedEvent();
+    }
+
+    setBubble({
+      ...bubble,
+      showEditAppointmentBubble: !bubble.showEditAppointmentBubble,
+      showNewAppointmentBubble: false,
     });
   };
 
@@ -91,6 +127,28 @@ const App = () => {
     });
 
     toggleNewAppointment();
+  };
+
+  let handleEventClick = (info) => {
+    let event = events.find((ev) => ev.id === +info.event.id),
+      employee = resources.find((em) => em.id === +event.resourceId),
+      service = services.find((ser) => ser.name === event.title);
+
+    setSelectedEvent({
+      ...selectedEvent,
+      customerId: event.customer.id,
+      employeeId: employee.id,
+      employeeName: `${employee.firstName} ${employee.lastName}`,
+      end: new Date(event.end),
+      endStr: event.end,
+      eventId: event.id,
+      notes: event.notes || '',
+      serviceId: service.id,
+      start: new Date(event.start),
+      startStr: event.start,
+    });
+
+    toggleEditAppointment();
   };
 
   let handleChange = (event) => {
@@ -122,25 +180,42 @@ const App = () => {
     event.preventDefault();
 
     let currentEvents = events,
-      { customerId, employeeId, endStr, notes, serviceId, startStr } = selectedEvent,
+      { customerId, employeeId, endStr, eventId, notes, serviceId, startStr } = selectedEvent,
+      calendarApi = calendarRef.current.getApi(),
       newId = +currentEvents.slice(-1)[0].id + 1,
       customer = customers.find((cs) => cs.id === +customerId),
       service = services.find((ser) => ser.id === +serviceId);
 
-    calendarRef.current.getApi().addEvent(
-      {
-        customer,
-        end: endStr,
-        id: newId,
-        notes,
-        employeeId: employeeId.toString(),
-        start: startStr,
-        title: service.name,
-      },
-      true
-    );
+    // eslint-disable-next-line
+    // debugger;
 
-    toggleNewAppointment();
+    if (bubble.showEditAppointmentBubble) {
+      let someEvent = calendarApi.getEventById(eventId);
+      // let someEvent = currentEvents.find((ev) => ev.id === eventId);
+      // console.log(selectedEvent, someEvent);
+
+      // eslint-disable-next-line
+      // debugger;
+
+      someEvent.setProp('notes', notes);
+      someEvent.setExtendedProp('notes', notes);
+      // someEvent.setStart(new Date(), {});
+    } else {
+      calendarApi.addEvent(
+        {
+          customer,
+          end: endStr,
+          id: newId,
+          notes,
+          employeeId: employeeId.toString(),
+          start: startStr,
+          title: service.name,
+        },
+        true
+      );
+
+      toggleNewAppointment();
+    }
   };
 
   let handleEventAdd = (event) => {
@@ -166,7 +241,22 @@ const App = () => {
       .then((res) => res.json())
       .then((response) => {
         setEvents(response);
+        setSelectedEvent({
+          customerId: null,
+          employeeId: '',
+          employeeName: '',
+          end: null,
+          endStr: null,
+          notes: '',
+          serviceId: '',
+          start: null,
+          startStr: null,
+        });
       });
+  };
+
+  let handleEventChange = (info) => {
+    console.log(info.event.toPlainObject(), info.oldEvent.toPlainObject());
   };
 
   return (
@@ -182,11 +272,10 @@ const App = () => {
           editable={true}
           events={events}
           eventAdd={handleEventAdd}
-          // eventClick={this.handleEventClick}
-          // eventChange={this.handleEventChange}
+          eventClick={handleEventClick}
+          eventChange={handleEventChange}
           eventContent={renderEventContent}
           eventResourceEditable={true}
-          // initialEvents={INITIAL_EVENTS}
           initialView="resourceTimeGridDay"
           nowIndicator={true}
           plugins={[resourceTimeGridPlugin, interactionPlugin]}
@@ -210,12 +299,30 @@ const App = () => {
           >
             <AppointmentWrapper
               customers={customers}
+              isEditAppointment={false}
               employees={resources}
               services={services}
               selectedEvent={selectedEvent}
               handleChange={handleChange}
             />
-            {/* // isEditAppointment={this.state.isEditAppointment} */}
+          </BubbleContainer>
+        )}
+
+        {bubble.showEditAppointmentBubble && (
+          <BubbleContainer
+            submitButtonText="Update"
+            title="Edit Appointment"
+            toggleBubble={toggleEditAppointment}
+            handleSubmit={handleSubmit}
+          >
+            <AppointmentWrapper
+              customers={customers}
+              isEditAppointment={true}
+              employees={resources}
+              services={services}
+              selectedEvent={selectedEvent}
+              handleChange={handleChange}
+            />
           </BubbleContainer>
         )}
       </main>
@@ -225,68 +332,6 @@ const App = () => {
 
 export default App;
 /*
-class App extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      calendarApi: null,
-      currentEvents: [],
-      customerName: '',
-      employeeId: null,
-      employeeName: null,
-      endTime: null,
-      isEditAppointment: false,
-      notes: '',
-      resources: resources,
-      selectedCustomer: null,
-      selectInfo: null,
-      selectedEvent: null,
-      selectedService: null,
-      selectedServiceId: null,
-      showEditAppointmentBubble: false,
-      showNewAppointmentBubble: false,
-      showToast: false,
-      startTime: null,
-      toastMessage: '',
-    };
-
-    this.calendarRef = createRef();
-  }
-
-  handleDateClick = (selectInfo) => {
-    let { end, resource, start, view } = selectInfo;
-
-    this.setState({
-      calendarApi: view.calendar,
-      employeeId: resource.id,
-      employeeName: resource.title,
-      endTime: end,
-      isEditAppointment: false,
-      showEditAppointmentBubble: false,
-      showNewAppointmentBubble: true,
-      startTime: start,
-    });
-  };
-
-  toggleNewAppointment = () => {
-    this.setState({
-      ...this.state,
-      notes: '',
-      showEditAppointmentBubble: false,
-      showNewAppointmentBubble: !this.state.showNewAppointmentBubble,
-    });
-  };
-
-  toggleEditAppointment = () => {
-    this.setState({
-      ...this.state,
-      notes: '',
-      showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
-      showNewAppointmentBubble: false,
-    });
-  };
-
   handleEventClick = ({ event }) => {
     let { end, extendedProps, start, title } = event,
       { customer, notes } = extendedProps,
@@ -308,124 +353,6 @@ class App extends Component {
       showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
       showNewAppointmentBubble: false,
       startTime: start,
-    });
-  };
-
-  handleEmployeeChange = (event) => {
-    const value = event.target.value;
-    const resource = resources.find((res) => res.id === value);
-
-    this.setState({
-      ...this.state,
-      employeeId: resource.id,
-      employeeName: resource.title,
-    });
-  };
-
-  handleChange = (event) => {
-    if (event && event.lastName) {
-      let name = `${event.firstName} ${event.lastName}`;
-
-      this.setState({
-        ...this.state,
-        customerName: name,
-        selectedCustomer: event,
-      });
-    } else if (event && event.target.name === 'selectedServiceId') {
-      let service = services.find((serv) => serv.id === event.target.value),
-        // calendarApi = this.calendarRef.current.getApi(),
-        date = this.state.startTime;
-
-      if (service) {
-        let startTime = new Date(date.setHours(this.state.startTime.getHours()));
-        let endTime = new Date(date.setMinutes(this.state.startTime.getMinutes()));
-
-        endTime = addMinutes(endTime, service.duration);
-
-        this.setState({
-          ...this.state,
-          [event.target.name]: event.target.value,
-          endTime: endTime,
-          startTime: startTime,
-        });
-      } else {
-        alert('Known Bug');
-      }
-    } else {
-      this.setState({
-        ...this.state,
-        [event.target.name]: event.target.value,
-      });
-    }
-  };
-
-  handleSubmit = (ev) => {
-    ev.preventDefault();
-
-    let {
-        calendarApi,
-        customerName,
-        employeeId,
-        endTime,
-        notes,
-        selectedEvent,
-        selectedCustomer,
-        selectedServiceId,
-        startTime,
-      } = this.state,
-      service = services.find((serv) => serv.id === selectedServiceId),
-      toastMessage = 'Appointment updated successfully';
-
-    if (selectedEvent) {
-      // alert('Currently we only support updating employee and service');
-      // selectedEvent.setExtendedProp('customer', {
-      //   ...selectedCustomer
-      // })
-      selectedEvent.setProp('title', service.name);
-      selectedEvent.setResources([employeeId]);
-      selectedEvent.setExtendedProp('notes', notes);
-    } else {
-      calendarApi.unselect();
-
-      calendarApi.addEvent({
-        id: createEventId(),
-        title: service.name,
-        start: startTime,
-        end: endTime,
-        resourceId: employeeId,
-        customer: {
-          ...selectedCustomer,
-          fullName: customerName,
-        },
-      });
-
-      toastMessage = 'Appointment created successfully';
-    }
-
-    this.setState({
-      ...this.state,
-      calendarApi: null,
-      customerName: '',
-      employeeId: null,
-      employeeName: null,
-      isEditAppointment: false,
-      notes: '',
-      selectedCustomer: null,
-      selectInfo: null,
-      selectedEvent: null,
-      selectedService: null,
-      selectedServiceId: null,
-      showEditAppointmentBubble: false,
-      showNewAppointmentBubble: false,
-      showToast: true,
-      toastMessage: toastMessage,
-    });
-  };
-
-  handleEvents = (events) => {
-    this.setState({
-      ...this.state,
-      currentEvents: events,
     });
   };
 
