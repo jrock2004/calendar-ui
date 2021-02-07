@@ -10,6 +10,7 @@ import { UiSelect } from '../UiSelect';
 import { GetAppointmentTime } from './GetAppointmentTime';
 
 export const AppointmentWrapper = ({
+  clickEventCancel,
   customers,
   employees,
   isEditAppointment,
@@ -18,8 +19,11 @@ export const AppointmentWrapper = ({
   handleChange,
 }) => {
   let showAppointmentTime = selectedEvent.end && selectedEvent.start;
-  let customer = customers.find((cs) => cs.id === +selectedEvent.customerId) || '';
-  let customerName = customer !== '' ? `${customer.firstName} ${customer.lastName}` : '';
+  let customer =
+    selectedEvent.customerId !== null
+      ? customers.find((cs) => +cs.id === +selectedEvent.customerId)
+      : null;
+  let customerName = customer !== null ? `${customer.firstName} ${customer.lastName}` : '';
 
   return (
     <div>
@@ -80,7 +84,7 @@ export const AppointmentWrapper = ({
               <IconServices />
               Confirm
             </Button>
-            <Button variant="tertiaryOutlined" size="4">
+            <Button variant="tertiaryOutlined" size="4" onClick={clickEventCancel}>
               <IconClose />
               Cancel
             </Button>
@@ -92,6 +96,7 @@ export const AppointmentWrapper = ({
 };
 
 AppointmentWrapper.propTypes = {
+  clickEventCancel: PropTypes.func,
   customers: PropTypes.array,
   employees: PropTypes.array,
   handleChange: PropTypes.func,

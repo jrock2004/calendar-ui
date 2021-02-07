@@ -1,22 +1,11 @@
-// import React, { Component, createRef } from 'react';
-// import FullCalendar from '@fullcalendar/react';
-// import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
-// import interactionPlugin from '@fullcalendar/interaction';
-// import addMinutes from 'date-fns/addMinutes';
-// import { Heading } from '@mbkit/typography';
-// import { Toaster } from '@mbkit/toaster';
-// import { IconClose } from '@mbkit/icon';
-
-// import { createEventId, INITIAL_EVENTS } from './data/events';
-// import resources from './data/resources';
-// import { services } from './data/services';
-
 import React, { createRef, useEffect, useState } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from '@fullcalendar/interaction';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
 import addMinutes from 'date-fns/addMinutes';
 import { Heading } from '@mbkit/typography';
+import { Toaster } from '@mbkit/toaster';
+import { IconClose } from '@mbkit/icon';
 
 import renderEventContent from './components/RenderEventContent';
 import resourceContent from './components/ResourceContent';
@@ -45,6 +34,10 @@ const App = () => {
     serviceId: '',
     start: null,
     startStr: null,
+  });
+  const [toast, setToast] = useState({
+    showToast: false,
+    toastMessage: '',
   });
 
   const calendarRef = createRef();
@@ -130,9 +123,11 @@ const App = () => {
   };
 
   let handleEventClick = (info) => {
-    let event = events.find((ev) => ev.id === +info.event.id),
-      employee = resources.find((em) => em.id === +event.resourceId),
-      service = services.find((ser) => ser.name === event.title);
+    // eslint-disable-next-line
+    // debugger;
+    let event = events.find((ev) => +ev.id === +info.event.id);
+    let employee = resources.find((em) => +em.id === +event.resourceId);
+    let service = services.find((ser) => ser.name === event.title);
 
     setSelectedEvent({
       ...selectedEvent,
@@ -252,11 +247,44 @@ const App = () => {
           start: null,
           startStr: null,
         });
+
+        setToast({
+          toastMessage: 'Appointment created successfully',
+          showToast: true,
+        });
       });
   };
 
   let handleEventChange = (info) => {
-    console.log(info.event.toPlainObject(), info.oldEvent.toPlainObject());
+    console.log('Event Changed', info.event.toPlainObject(), info.oldEvent.toPlainObject());
+  };
+
+  let handleEventRemove = (info) => {
+    fetch(`${HOST}/events/${info.event.id}.json`, {
+      method: 'DELETE',
+    }).then(() => {
+      setToast({
+        toastMessage: `${info.event.title} appointment has been cancelled`,
+        showToast: true,
+      });
+    });
+  };
+
+  let clickEventCancel = (event) => {
+    event.preventDefault();
+
+    let currentEvent = calendarRef.current.getApi().getEventById(+selectedEvent.eventId);
+
+    currentEvent.remove();
+
+    toggleEditAppointment();
+  };
+
+  let handleToastMessage = () => {
+    setToast({
+      ...toast,
+      showToast: false,
+    });
   };
 
   return (
@@ -275,6 +303,7 @@ const App = () => {
           eventClick={handleEventClick}
           eventChange={handleEventChange}
           eventContent={renderEventContent}
+          eventRemove={handleEventRemove}
           eventResourceEditable={true}
           initialView="resourceTimeGridDay"
           nowIndicator={true}
@@ -303,6 +332,7 @@ const App = () => {
               employees={resources}
               services={services}
               selectedEvent={selectedEvent}
+              clickEventCancel={clickEventCancel}
               handleChange={handleChange}
             />
           </BubbleContainer>
@@ -321,129 +351,22 @@ const App = () => {
               employees={resources}
               services={services}
               selectedEvent={selectedEvent}
+              clickEventCancel={clickEventCancel}
               handleChange={handleChange}
             />
           </BubbleContainer>
         )}
-      </main>
-    </>
-  );
-};
 
-export default App;
-/*
-  handleEventClick = ({ event }) => {
-    let { end, extendedProps, start, title } = event,
-      { customer, notes } = extendedProps,
-      customerName = `${customer.firstName} ${customer.lastName}`,
-      selectedService = services.find((serv) => serv.name === title),
-      eventResource = event.getResources()[0];
-
-    this.setState({
-      ...this.state,
-      calendarApi: this.calendarRef,
-      customerName: customerName,
-      employeeId: eventResource.id,
-      employeeName: eventResource.title,
-      endTime: end,
-      isEditAppointment: true,
-      notes: notes,
-      selectedEvent: event,
-      selectedServiceId: selectedService.id,
-      showEditAppointmentBubble: !this.state.showEditAppointmentBubble,
-      showNewAppointmentBubble: false,
-      startTime: start,
-    });
-  };
-
-  handleToastMessage = () => {
-    this.setState({
-      ...this.state,
-      showToast: false,
-    });
-  };
-
-  render() {
-    return (
-      <>
-        <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
-          <Heading as="h1" color="primary">
-            Scheduling
-          </Heading>
-        </header>
-        <main className="px-6 pt-4">
-          <FullCalendar
-            allDaySlot={false}
-            editable={true}
-            eventClick={this.handleEventClick}
-            eventChange={this.handleEventChange}
-            eventContent={renderEventContent}
-            initialEvents={INITIAL_EVENTS}
-            initialView="resourceTimeGridDay"
-            nowIndicator={true}
-            plugins={[resourceTimeGridPlugin, interactionPlugin]}
-            ref={this.calendarRef}
-            resourceLabelContent={resourceContent}
-            resources={this.state.resources}
-            select={this.handleDateClick}
-            selectable={true}
-            selectConstraint="businessHours"
-            slotDuration="00:15:00"
-            slotMaxTime="20:00:00"
-            slotMinTime="08:00:00"
-          />
-
-          {this.state.showNewAppointmentBubble && (
-            <BubbleContainer
-              submitButtonText="Book"
-              title={`New Appointment with ${this.state.employeeName}`}
-              toggleBubble={this.toggleNewAppointment}
-              handleSubmit={this.handleSubmit}
-            >
-              <AppointmentWrapper
-                employeeId={this.state.employeeId}
-                end={this.state.endTime}
-                handleChange={this.handleChange}
-                handleEmployeeChange={this.handleEmployeeChange}
-                isEditAppointment={this.state.isEditAppointment}
-                notes={this.state.notes}
-                start={this.state.startTime}
-              />
-            </BubbleContainer>
-          )}
-
-          {this.state.showEditAppointmentBubble && (
-            <BubbleContainer
-              submitButtonText="Update"
-              title="Edit Appointment"
-              toggleBubble={this.toggleEditAppointment}
-              handleSubmit={this.handleSubmit}
-            >
-              <AppointmentWrapper
-                employeeId={this.state.employeeId}
-                end={this.state.endTime}
-                handleChange={this.handleChange}
-                handleEmployeeChange={this.handleEmployeeChange}
-                isEditAppointment={this.state.isEditAppointment}
-                notes={this.state.notes}
-                start={this.state.startTime}
-                customerName={this.state.customerName}
-                employeeName={this.state.employeeName}
-                selectedServiceId={this.state.selectedServiceId}
-              />
-            </BubbleContainer>
-          )}
-        </main>
         <Toaster
-          show={this.state.showToast}
+          show={toast.showToast}
           style={{
             zIndex: 1000,
           }}
         >
           <div style={{ display: 'flex' }}>
-            {this.state.toastMessage}
+            {toast.toastMessage}
             <IconClose
-              onClick={this.handleToastMessage}
+              onClick={handleToastMessage}
               style={{
                 marginLeft: '15px',
                 marginTop: '-3px',
@@ -451,8 +374,9 @@ export default App;
             />
           </div>
         </Toaster>
-      </>
-    );
-  }
-}
-*/
+      </main>
+    </>
+  );
+};
+
+export default App;
