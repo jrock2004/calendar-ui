@@ -181,20 +181,21 @@ const App = () => {
       customer = customers.find((cs) => cs.id === +customerId),
       service = services.find((ser) => ser.id === +serviceId);
 
-    // eslint-disable-next-line
-    // debugger;
-
     if (bubble.showEditAppointmentBubble) {
       let someEvent = calendarApi.getEventById(eventId);
-      // let someEvent = currentEvents.find((ev) => ev.id === eventId);
-      // console.log(selectedEvent, someEvent);
 
-      // eslint-disable-next-line
-      // debugger;
+      someEvent.mutate({
+        end: endStr,
+        extendedProps: {
+          customer,
+          employeeId: employeeId.toString(),
+          notes,
+        },
+        start: startStr,
+        title: service.name,
+      });
 
-      someEvent.setProp('notes', notes);
-      someEvent.setExtendedProp('notes', notes);
-      // someEvent.setStart(new Date(), {});
+      toggleEditAppointment();
     } else {
       calendarApi.addEvent(
         {
@@ -256,7 +257,39 @@ const App = () => {
   };
 
   let handleEventChange = (info) => {
-    console.log('Event Changed', info.event.toPlainObject(), info.oldEvent.toPlainObject());
+    let newEvent = info.event.toPlainObject();
+
+    console.log(newEvent);
+
+    const eventsArray = events.map((ev) => {
+      if (+ev.id === +newEvent.id) {
+        return {
+          customer: newEvent.extendedProps.customer,
+          end: newEvent.end,
+          id: +newEvent.id,
+          notes: newEvent.extendedProps.notes,
+          resourceId: newEvent.extendedProps.employeeId,
+          start: newEvent.start,
+          title: newEvent.title,
+        };
+      } else {
+        return ev;
+      }
+    });
+
+    fetch(`${HOST}/events.json`, {
+      method: 'PUT',
+      body: JSON.stringify(eventsArray),
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        setEvents(response);
+
+        setToast({
+          toastMessage: 'Appointment was updated successfully',
+          showToast: true,
+        });
+      });
   };
 
   let handleEventRemove = (info) => {
