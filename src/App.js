@@ -40,6 +40,9 @@ const App = () => {
     toastMessage: '',
   });
 
+  // This is for updating to gather all changes before calling the API
+  let isUpdatingEvent = false;
+
   const calendarRef = createRef();
 
   async function requestResources(type) {
@@ -123,8 +126,6 @@ const App = () => {
   };
 
   let handleEventClick = (info) => {
-    // eslint-disable-next-line
-    // debugger;
     let event = events.find((ev) => +ev.id === +info.event.id);
     let employee = resources.find((em) => +em.id === +event.resourceId);
     let service = services.find((ser) => ser.name === event.title);
@@ -175,7 +176,17 @@ const App = () => {
     event.preventDefault();
 
     let currentEvents = events,
-      { customerId, employeeId, endStr, eventId, notes, serviceId, startStr } = selectedEvent,
+      {
+        customerId,
+        employeeId,
+        end,
+        endStr,
+        eventId,
+        notes,
+        serviceId,
+        start,
+        startStr,
+      } = selectedEvent,
       calendarApi = calendarRef.current.getApi(),
       newId = +currentEvents.slice(-1)[0].id + 1,
       customer = customers.find((cs) => cs.id === +customerId),
@@ -184,16 +195,15 @@ const App = () => {
     if (bubble.showEditAppointmentBubble) {
       let someEvent = calendarApi.getEventById(eventId);
 
-      someEvent.mutate({
-        end: endStr,
-        extendedProps: {
-          customer,
-          employeeId: employeeId.toString(),
-          notes,
-        },
-        start: startStr,
-        title: service.name,
-      });
+      isUpdatingEvent = true;
+      someEvent.setProp('title', service.name);
+      someEvent.setEnd(end);
+      someEvent.setStart(start);
+      someEvent.setExtendedProp('customer', customer);
+      someEvent.setExtendedProp('employeeId', employeeId.toString());
+
+      isUpdatingEvent = false;
+      someEvent.setExtendedProp('notes', notes);
 
       toggleEditAppointment();
     } else {
@@ -259,37 +269,38 @@ const App = () => {
   let handleEventChange = (info) => {
     let newEvent = info.event.toPlainObject();
 
-    console.log(newEvent);
-
-    const eventsArray = events.map((ev) => {
-      if (+ev.id === +newEvent.id) {
-        return {
-          customer: newEvent.extendedProps.customer,
-          end: newEvent.end,
-          id: +newEvent.id,
-          notes: newEvent.extendedProps.notes,
-          resourceId: newEvent.extendedProps.employeeId,
-          start: newEvent.start,
-          title: newEvent.title,
-        };
-      } else {
-        return ev;
-      }
-    });
-
-    fetch(`${HOST}/events.json`, {
-      method: 'PUT',
-      body: JSON.stringify(eventsArray),
-    })
-      .then((res) => res.json())
-      .then((response) => {
-        setEvents(response);
-
-        setToast({
-          toastMessage: 'Appointment was updated successfully',
-          showToast: true,
-        });
+    if (!isUpdatingEvent) {
+      console.log('asdasds');
+      const eventsArray = events.map((ev) => {
+        if (+ev.id === +newEvent.id) {
+          return {
+            customer: newEvent.extendedProps.customer,
+            end: newEvent.end,
+            id: +newEvent.id,
+            notes: newEvent.extendedProps.notes,
+            resourceId: newEvent.extendedProps.employeeId,
+            start: newEvent.start,
+            title: newEvent.title,
+          };
+        } else {
+          return ev;
+        }
       });
+
+      fetch(`${HOST}/events.json`, {
+        method: 'PUT',
+        body: JSON.stringify(eventsArray),
+      })
+        .then((res) => res.json())
+        .then((response) => {
+          setEvents(response);
+
+          setToast({
+            toastMessage: 'Appointment was updated successfully',
+            showToast: true,
+          });
+        });
+    }
   };
 
   let handleEventRemove = (info) => {
