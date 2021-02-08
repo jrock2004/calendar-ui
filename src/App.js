@@ -270,7 +270,6 @@ const App = () => {
     let newEvent = info.event.toPlainObject();
 
     if (!isUpdatingEvent) {
-      console.log('asdasds');
       const eventsArray = events.map((ev) => {
         if (+ev.id === +newEvent.id) {
           return {
@@ -304,9 +303,18 @@ const App = () => {
   };
 
   let handleEventRemove = (info) => {
-    fetch(`${HOST}/events/${info.event.id}.json`, {
-      method: 'DELETE',
+    let deleteEvent = info.event;
+
+    let data = events.filter((ev) => +ev.id !== +deleteEvent.id);
+
+    fetch(`${HOST}/events.json`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
     }).then(() => {
+      toggleEditAppointment();
+
+      setEvents(data);
+
       setToast({
         toastMessage: `${info.event.title} appointment has been cancelled`,
         showToast: true,
@@ -320,8 +328,6 @@ const App = () => {
     let currentEvent = calendarRef.current.getApi().getEventById(+selectedEvent.eventId);
 
     currentEvent.remove();
-
-    toggleEditAppointment();
   };
 
   let handleToastMessage = () => {
