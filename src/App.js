@@ -276,14 +276,18 @@ const App = () => {
     let newEvent = info.event.toPlainObject();
 
     if (!isUpdatingEvent) {
-      const eventsArray = events.map((ev) => {
+      let resourceId = newEvent.extendedProps.employeeId
+        ? newEvent.extendedProps.employeeId
+        : info.event.getResources()[0].id;
+
+      let eventsArray = events.map((ev) => {
         if (+ev.id === +newEvent.id) {
           return {
             customer: newEvent.extendedProps.customer,
             end: newEvent.end,
             id: +newEvent.id,
             notes: newEvent.extendedProps.notes,
-            resourceId: newEvent.extendedProps.employeeId,
+            resourceId: resourceId,
             start: newEvent.start,
             title: newEvent.title,
           };
@@ -299,7 +303,6 @@ const App = () => {
         .then((res) => res.json())
         .then((response) => {
           setEvents(response);
-
           setToast({
             toastMessage: 'Appointment was updated successfully',
             showToast: true,
@@ -343,6 +346,8 @@ const App = () => {
     });
   };
 
+  let handleEventDrop = () => {};
+
   return (
     <>
       <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
@@ -359,6 +364,7 @@ const App = () => {
           eventClick={handleEventClick}
           eventChange={handleEventChange}
           eventContent={renderEventContent}
+          eventDrop={handleEventDrop}
           eventRemove={handleEventRemove}
           eventResourceEditable={true}
           initialView="resourceTimeGridDay"

@@ -76,11 +76,11 @@ export const AppointmentWrapper = ({
       {isEditAppointment && (
         <div className="mt-8 border-t pt-4">
           <div className="grid grid-flow-col auto-cols-max gap-3">
-            <Button variant="tertiaryOutlined" size="4">
+            <Button variant="tertiaryOutlined" size="4" disabled={true}>
               <IconCreditCard />
               Take Payment
             </Button>
-            <Button variant="tertiaryOutlined" size="4">
+            <Button variant="tertiaryOutlined" size="4" disabled={true}>
               <IconServices />
               Confirm
             </Button>
