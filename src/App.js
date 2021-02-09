@@ -63,8 +63,6 @@ const App = () => {
     requestResources('customers');
     requestResources('services');
     requestResources('events');
-
-    console.log(events);
   }, []);
 
   let resetSelectedEvent = () => {
@@ -221,6 +219,7 @@ const App = () => {
           extendedProps: {
             customer,
             notes,
+            status: 1,
           },
           id: +newId,
           employeeId: employeeId,
@@ -235,20 +234,21 @@ const App = () => {
   };
 
   let handleEventAdd = (event) => {
-    let newEvent = event.event.toPlainObject();
+    let newEvent = event.event.toPlainObject(),
+      newId = +newEvent.id,
+      resourceId = +newEvent.extendedProps.employeeId;
 
     let data = [
       ...events,
       {
-        end: newEvent.end,
+        ...newEvent,
         extendedProps: {
           customer: newEvent.extendedProps.customer,
           notes: newEvent.extendedProps.notes,
+          status: +newEvent.extendedProps.status,
         },
-        id: +newEvent.id,
-        resourceId: +newEvent.extendedProps.employeeId,
-        start: newEvent.start,
-        title: newEvent.title,
+        id: newId,
+        resourceId: resourceId,
       },
     ];
 
@@ -273,21 +273,21 @@ const App = () => {
 
     if (!isUpdatingEvent) {
       let resourceId = newEvent.extendedProps.employeeId
-        ? newEvent.extendedProps.employeeId
-        : info.event.getResources()[0].id;
+          ? +newEvent.extendedProps.employeeId
+          : +info.event.getResources()[0].id,
+        newId = +newEvent.id;
 
       let eventsArray = events.map((ev) => {
         if (+ev.id === +newEvent.id) {
           return {
+            ...newEvent,
             extendedProps: {
               customer: newEvent.extendedProps.customer,
               notes: newEvent.extendedProps.notes,
+              status: +newEvent.extendedProps.status,
             },
-            end: newEvent.end,
-            id: +newEvent.id,
-            resourceId: +resourceId,
-            start: newEvent.start,
-            title: newEvent.title,
+            id: newId,
+            resourceId,
           };
         } else {
           return ev;
@@ -344,8 +344,6 @@ const App = () => {
     });
   };
 
-  let handleEventDrop = () => {};
-
   return (
     <>
       <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
@@ -362,7 +360,6 @@ const App = () => {
           eventClick={handleEventClick}
           eventChange={handleEventChange}
           eventContent={renderEventContent}
-          eventDrop={handleEventDrop}
           eventRemove={handleEventRemove}
           eventResourceEditable={true}
           initialView="resourceTimeGridDay"
