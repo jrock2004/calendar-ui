@@ -8,12 +8,14 @@ export const RenderEventContent = (eventInfo) => {
   const customer =
     event.extendedProps.customer.firstName !== undefined ? event.extendedProps.customer : '';
   const distance = differenceInMinutes(event.end, event.start);
+  const status = event.extendedProps.status;
 
   return (
     <EventContent
-      distance={distance}
-      timeText={timeText}
       customerName={customer.fullName}
+      distance={distance}
+      status={status}
+      timeText={timeText}
       title={event.title}
     />
   );

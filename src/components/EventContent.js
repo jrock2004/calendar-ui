@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text } from '@mbkit/typography';
+import { IconCheckMark } from '@mbkit/icon';
 
-export const EventContent = ({ distance, timeText, customerName, title }) => {
+export const EventContent = ({ distance, timeText, customerName, status, title }) => {
   if (distance <= 15) {
     return (
       <div className="flex justify-between px-4">
@@ -9,9 +10,16 @@ export const EventContent = ({ distance, timeText, customerName, title }) => {
         <Text color="white" className="hidden">
           {customerName}
         </Text>
-        <Text color="white" size={5}>
-          {title}
-        </Text>
+        <div className="flex items-center">
+          {status === 2 && (
+            <div className="icon-container mr-1">
+              <IconCheckMark height="20" width="20" />
+            </div>
+          )}
+          <Text className="inline-block" color="white" size={5}>
+            {title}
+          </Text>
+        </div>
       </div>
     );
   } else if (distance <= 30) {
@@ -23,15 +31,29 @@ export const EventContent = ({ distance, timeText, customerName, title }) => {
             {customerName}
           </Text>
         </div>
-        <Text color="white" size={5}>
-          {title}
-        </Text>
+        <div className="flex justify-between">
+          <Text color="white" size={5}>
+            {title}
+          </Text>
+          {status === 2 && (
+            <div className="icon-container">
+              <IconCheckMark height="20" width="20" />
+            </div>
+          )}
+        </div>
       </div>
     );
   } else {
     return (
       <div className="flex flex-col">
-        <Text color="white">{timeText}</Text>
+        <div className="flex justify-between">
+          <Text color="white">{timeText}</Text>
+          {status === 2 && (
+            <div className="icon-container">
+              <IconCheckMark height="20" width="20" />
+            </div>
+          )}
+        </div>
         <Text color="white" size="5">
           {customerName}
         </Text>

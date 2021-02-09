@@ -35,6 +35,7 @@ const App = () => {
     serviceId: null,
     start: null,
     startStr: null,
+    status: 1,
   });
   const [toast, setToast] = useState({
     showToast: false,
@@ -77,6 +78,7 @@ const App = () => {
       serviceId: null,
       start: null,
       startStr: null,
+      status: 1,
     });
   };
 
@@ -143,6 +145,7 @@ const App = () => {
       serviceId: service.id,
       start: new Date(event.start),
       startStr: event.start,
+      status: event.extendedProps.status || 1,
     });
 
     toggleEditAppointment();
@@ -344,8 +347,18 @@ const App = () => {
     });
   };
 
+  let handleConfirmClick = (ev) => {
+    ev.preventDefault();
+
+    let currentEvent = calendarRef.current.getApi().getEventById(+selectedEvent.eventId);
+
+    currentEvent.setExtendedProp('status', 2);
+
+    toggleEditAppointment();
+  };
+
   return (
-    <>
+    <div className="h-full grid main-container">
       <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
         <Heading as="h1" color="primary">
           Scheduling
@@ -362,6 +375,7 @@ const App = () => {
           eventContent={renderEventContent}
           eventRemove={handleEventRemove}
           eventResourceEditable={true}
+          height="100%"
           initialView="resourceTimeGridDay"
           nowIndicator={true}
           plugins={[resourceTimeGridPlugin, interactionPlugin]}
@@ -410,6 +424,7 @@ const App = () => {
               selectedEvent={selectedEvent}
               clickEventCancel={clickEventCancel}
               handleChange={handleChange}
+              handleConfirmClick={handleConfirmClick}
             />
           </BubbleContainer>
         )}
@@ -432,7 +447,7 @@ const App = () => {
           </div>
         </Toaster>
       </main>
-    </>
+    </div>
   );
 };
 

@@ -17,6 +17,7 @@ export const AppointmentWrapper = ({
   selectedEvent,
   services,
   handleChange,
+  handleConfirmClick,
 }) => {
   let showAppointmentTime = selectedEvent.end && selectedEvent.start;
   let customer =
@@ -24,6 +25,7 @@ export const AppointmentWrapper = ({
       ? customers.find((cs) => +cs.id === +selectedEvent.customerId)
       : null;
   let customerName = customer !== null ? `${customer.firstName} ${customer.lastName}` : '';
+  let status = selectedEvent.status;
 
   return (
     <div>
@@ -80,7 +82,12 @@ export const AppointmentWrapper = ({
               <IconCreditCard />
               Take Payment
             </Button>
-            <Button variant="tertiaryOutlined" size="4" disabled={true}>
+            <Button
+              variant="tertiaryOutlined"
+              size="4"
+              disabled={status !== 1}
+              onClick={handleConfirmClick}
+            >
               <IconServices />
               Confirm
             </Button>
@@ -100,6 +107,7 @@ AppointmentWrapper.propTypes = {
   customers: PropTypes.array,
   employees: PropTypes.array,
   handleChange: PropTypes.func,
+  handleConfirmClick: PropTypes.func,
   isEditAppointment: PropTypes.bool,
   selectedEvent: PropTypes.object,
   services: PropTypes.array,
