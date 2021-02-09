@@ -63,6 +63,8 @@ const App = () => {
     requestResources('customers');
     requestResources('services');
     requestResources('events');
+
+    console.log(events);
   }, []);
 
   let resetSelectedEvent = () => {
@@ -133,13 +135,13 @@ const App = () => {
 
     setSelectedEvent({
       ...selectedEvent,
-      customerId: event.customer.id,
+      customerId: event.extendedProps.customer.id,
       employeeId: employee.id,
       employeeName: `${employee.firstName} ${employee.lastName}`,
       end: new Date(event.end),
       endStr: event.end,
       eventId: event.id,
-      notes: event.notes || '',
+      notes: event.extendedProps.notes || '',
       serviceId: service.id,
       start: new Date(event.start),
       startStr: event.start,
@@ -215,10 +217,12 @@ const App = () => {
     } else {
       calendarApi.addEvent(
         {
-          customer,
           end: endStr,
-          id: newId,
-          notes,
+          extendedProps: {
+            customer,
+            notes,
+          },
+          id: +newId,
           employeeId: employeeId,
           start: startStr,
           title: service.name,
@@ -236,11 +240,13 @@ const App = () => {
     let data = [
       ...events,
       {
-        customer: newEvent.extendedProps.customer,
         end: newEvent.end,
-        id: newEvent.id,
-        notes: newEvent.extendedProps.notes,
-        resourceId: newEvent.extendedProps.employeeId,
+        extendedProps: {
+          customer: newEvent.extendedProps.customer,
+          notes: newEvent.extendedProps.notes,
+        },
+        id: +newEvent.id,
+        resourceId: +newEvent.extendedProps.employeeId,
         start: newEvent.start,
         title: newEvent.title,
       },
@@ -253,17 +259,7 @@ const App = () => {
       .then((res) => res.json())
       .then((response) => {
         setEvents(response);
-        setSelectedEvent({
-          customerId: null,
-          employeeId: '',
-          employeeName: '',
-          end: null,
-          endStr: null,
-          notes: '',
-          serviceId: '',
-          start: null,
-          startStr: null,
-        });
+        resetSelectedEvent();
 
         setToast({
           toastMessage: 'Appointment created successfully',
@@ -283,11 +279,13 @@ const App = () => {
       let eventsArray = events.map((ev) => {
         if (+ev.id === +newEvent.id) {
           return {
-            customer: newEvent.extendedProps.customer,
+            extendedProps: {
+              customer: newEvent.extendedProps.customer,
+              notes: newEvent.extendedProps.notes,
+            },
             end: newEvent.end,
             id: +newEvent.id,
-            notes: newEvent.extendedProps.notes,
-            resourceId: resourceId,
+            resourceId: +resourceId,
             start: newEvent.start,
             title: newEvent.title,
           };
