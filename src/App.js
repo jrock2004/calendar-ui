@@ -22,16 +22,17 @@ const App = () => {
   const [services, setServices] = useState([]);
   const [events, setEvents] = useState([]);
   const [bubble, setBubble] = useState({
+    showEditAppointmentBubble: false,
     showNewAppointmentBubble: false,
   });
   const [selectedEvent, setSelectedEvent] = useState({
     customerId: null,
-    employeeId: '',
+    employeeId: null,
     employeeName: '',
     end: null,
     endStr: null,
     notes: '',
-    serviceId: '',
+    serviceId: null,
     start: null,
     startStr: null,
   });
@@ -67,13 +68,13 @@ const App = () => {
   let resetSelectedEvent = () => {
     setSelectedEvent({
       customerId: null,
-      employeeId: '',
+      employeeId: null,
       employeeName: '',
       end: null,
       endStr: null,
       eventId: null,
       notes: '',
-      serviceId: '',
+      serviceId: null,
       start: null,
       startStr: null,
     });
@@ -162,7 +163,12 @@ const App = () => {
         ...selectedEvent,
         end: endDate,
         endStr: calendarApi.formatIso(endDate),
-        serviceId: service.id.toString(),
+        serviceId: service.id,
+      });
+    } else if (event && event.target.name === 'employeeId') {
+      setSelectedEvent({
+        ...selectedEvent,
+        [event.target.name]: +event.target.value,
       });
     } else {
       setSelectedEvent({
@@ -200,7 +206,7 @@ const App = () => {
       someEvent.setEnd(end);
       someEvent.setStart(start);
       someEvent.setExtendedProp('customer', customer);
-      someEvent.setExtendedProp('employeeId', employeeId.toString());
+      someEvent.setExtendedProp('employeeId', employeeId);
 
       isUpdatingEvent = false;
       someEvent.setExtendedProp('notes', notes);
@@ -213,7 +219,7 @@ const App = () => {
           end: endStr,
           id: newId,
           notes,
-          employeeId: employeeId.toString(),
+          employeeId: employeeId,
           start: startStr,
           title: service.name,
         },

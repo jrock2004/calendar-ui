@@ -41,7 +41,7 @@ export const AppointmentWrapper = ({
       <UiSelect
         name="serviceId"
         label="Choose a service"
-        value={selectedEvent.serviceId.toString()}
+        value={selectedEvent.serviceId}
         handleChange={handleChange}
       >
         <option>Please select a service</option>
@@ -55,7 +55,7 @@ export const AppointmentWrapper = ({
       <UiSelect
         name="employeeId"
         label="Choose a employee"
-        value={selectedEvent.employeeId.toString()}
+        value={+selectedEvent.employeeId}
         handleChange={handleChange}
       >
         <option>Please select a employee</option>
