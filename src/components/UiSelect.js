@@ -4,10 +4,12 @@ import { Label } from '@mbkit/label';
 import { Select } from '@mbkit/select';
 
 export const UiSelect = ({ name, label, value, handleChange, children }) => {
+  let passedValue = value ? value : '';
+
   return (
     <div className="flex flex-col mb-4">
       <Label htmlFor={name}>{label}</Label>
-      <Select name={name} value={value} onChange={handleChange}>
+      <Select name={name} value={passedValue} onChange={handleChange}>
         {children}
       </Select>
     </div>
@@ -19,7 +21,7 @@ UiSelect.propTypes = {
   handleChange: PropTypes.func,
   label: PropTypes.string,
   name: PropTypes.string,
-  value: PropTypes.string,
+  value: PropTypes.number,
 };
 
 export default UiSelect;
