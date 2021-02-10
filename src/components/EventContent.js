@@ -5,7 +5,7 @@ import { IconCheckMark } from '@mbkit/icon';
 export const EventContent = ({ distance, timeText, customerName, status, title }) => {
   if (distance <= 15) {
     return (
-      <div role="button" tabIndex="0" className="flex justify-between px-4">
+      <button tabIndex="0" className="flex justify-between px-4 w-full h-full">
         <Text color="white">{timeText}</Text>
         <Text color="white" className="hidden">
           {customerName}
@@ -20,11 +20,11 @@ export const EventContent = ({ distance, timeText, customerName, status, title }
             {title}
           </Text>
         </div>
-      </div>
+      </button>
     );
   } else if (distance <= 30) {
     return (
-      <div role="button" tabIndex="0" className="flex flex-col">
+      <button tabIndex="0" className="flex flex-col w-full h-full">
         <div className="flex justify-between">
           <Text color="white">{timeText}</Text>
           <Text color="white" size={5}>
@@ -41,11 +41,11 @@ export const EventContent = ({ distance, timeText, customerName, status, title }
             </div>
           )}
         </div>
-      </div>
+      </button>
     );
   } else {
     return (
-      <div role="button" tabIndex="0" className="flex flex-col">
+      <button tabIndex="0" className="flex flex-col w-full h-full">
         <div className="flex justify-between">
           <Text color="white">{timeText}</Text>
           {status === 2 && (
@@ -54,13 +54,15 @@ export const EventContent = ({ distance, timeText, customerName, status, title }
             </div>
           )}
         </div>
-        <Text color="white" size="5">
-          {customerName}
-        </Text>
-        <Text color="white" size={5}>
-          {title}
-        </Text>
-      </div>
+        <div className="text-left">
+          <Text color="white" size="5">
+            {customerName}
+          </Text>
+          <Text color="white" size={5}>
+            {title}
+          </Text>
+        </div>
+      </button>
     );
   }
 };
