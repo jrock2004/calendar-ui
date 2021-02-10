@@ -5,7 +5,7 @@ import { IconCheckMark } from '@mbkit/icon';
 export const EventContent = ({ distance, timeText, customerName, status, title }) => {
   if (distance <= 15) {
     return (
-      <div className="flex justify-between px-4">
+      <div role="button" tabIndex="0" className="flex justify-between px-4">
         <Text color="white">{timeText}</Text>
         <Text color="white" className="hidden">
           {customerName}
@@ -24,7 +24,7 @@ export const EventContent = ({ distance, timeText, customerName, status, title }
     );
   } else if (distance <= 30) {
     return (
-      <div className="flex flex-col">
+      <div role="button" tabIndex="0" className="flex flex-col">
         <div className="flex justify-between">
           <Text color="white">{timeText}</Text>
           <Text color="white" size={5}>
@@ -45,7 +45,7 @@ export const EventContent = ({ distance, timeText, customerName, status, title }
     );
   } else {
     return (
-      <div className="flex flex-col">
+      <div role="button" tabIndex="0" className="flex flex-col">
         <div className="flex justify-between">
           <Text color="white">{timeText}</Text>
           {status === 2 && (
