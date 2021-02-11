@@ -47,6 +47,7 @@ const App = () => {
     showToast: false,
     toastMessage: '',
   });
+  const [isLocalEditing, setIsLocalEditing] = useState(false);
 
   // This is for updating to gather all changes before calling the API
   let isUpdatingEvent = false;
@@ -111,6 +112,8 @@ const App = () => {
       if (removeAppt) {
         let param = `/events/${selectedEvent.id}`;
 
+        setIsLocalEditing(false);
+
         db.ref(param).remove();
       }
       resetSelectedEvent();
@@ -141,34 +144,40 @@ const App = () => {
   let handleDateClick = (selectInfo) => {
     let { end, endStr, resource, start, startStr } = selectInfo;
 
-    let newEvent = {
-      ...selectedEvent,
-      end,
-      endStr,
-      employeeId: resource.id,
-      employeeName: resource.title,
-      start,
-      startStr,
-    };
+    if (!isLocalEditing) {
+      setIsLocalEditing(true);
 
-    // Setting up ghost appt
-    db.ref('events')
-      .push({
-        end: endStr,
-        extendedProps: {
-          status: 3,
-        },
-        resourceId: +resource.id,
-        start: startStr,
-      })
-      .then((res) => {
-        setSelectedEvent({
-          ...newEvent,
-          id: res.getKey(),
+      let newEvent = {
+        ...selectedEvent,
+        end,
+        endStr,
+        employeeId: resource.id,
+        employeeName: resource.title,
+        start,
+        startStr,
+      };
+
+      // Setting up ghost appt
+      db.ref('events')
+        .push({
+          end: endStr,
+          extendedProps: {
+            status: 3,
+          },
+          resourceId: +resource.id,
+          start: startStr,
+        })
+        .then((res) => {
+          setSelectedEvent({
+            ...newEvent,
+            id: res.getKey(),
+          });
+
+          toggleNewAppointment();
         });
-
-        toggleNewAppointment();
-      });
+    } else {
+      return;
+    }
   };
 
   let handleEventClick = (info) => {
@@ -226,6 +235,8 @@ const App = () => {
 
   let handleSubmit = (event) => {
     event.preventDefault();
+
+    setIsLocalEditing(false);
 
     let {
         customerId,
@@ -342,6 +353,8 @@ const App = () => {
     let deleteEvent = info.event,
       param = `/events/${deleteEvent.id}`;
 
+    setIsLocalEditing(false);
+
     db.ref(param)
       .remove()
       .then(() => {
@@ -358,6 +371,7 @@ const App = () => {
 
     let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.eventId);
 
+    setIsLocalEditing(false);
     currentEvent.remove();
   };
 
@@ -373,6 +387,7 @@ const App = () => {
 
     let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.eventId);
 
+    setIsLocalEditing(true);
     currentEvent.setExtendedProp('status', 2);
 
     toggleEditAppointment();
