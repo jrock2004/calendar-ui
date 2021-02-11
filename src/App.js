@@ -41,7 +41,7 @@ const App = () => {
     serviceId: null,
     start: null,
     startStr: null,
-    status: 1,
+    status: 3,
   });
   const [toast, setToast] = useState({
     showToast: false,
@@ -136,7 +136,7 @@ const App = () => {
   let handleDateClick = (selectInfo) => {
     let { end, endStr, resource, start, startStr } = selectInfo;
 
-    setSelectedEvent({
+    let newEvent = {
       ...selectedEvent,
       end,
       endStr,
@@ -144,9 +144,26 @@ const App = () => {
       employeeName: resource.title,
       start,
       startStr,
-    });
+    };
 
-    toggleNewAppointment();
+    // Setting up ghost appt
+    db.ref('events')
+      .push({
+        end: endStr,
+        extendedProps: {
+          status: 3,
+        },
+        resourceId: +resource.id,
+        start: startStr,
+      })
+      .then((res) => {
+        setSelectedEvent({
+          ...newEvent,
+          id: res.getKey(),
+        });
+
+        toggleNewAppointment();
+      });
   };
 
   let handleEventClick = (info) => {
@@ -258,19 +275,22 @@ const App = () => {
     let newEvent = event.event.toPlainObject(),
       resourceId = +newEvent.extendedProps.employeeId;
 
-    db.ref('events')
-      .push({
-        ...newEvent,
-        extendedProps: {
-          customer: newEvent.extendedProps.customer,
-          notes: newEvent.extendedProps.notes,
-          status: +newEvent.extendedProps.status,
-        },
-        resourceId: resourceId,
-      })
-      .then(() => {
-        resetSelectedEvent();
+    let updates = {},
+      param = `/events/${selectedEvent.id}`;
 
+    updates[param] = {
+      ...newEvent,
+      extendedProps: {
+        customer: newEvent.extendedProps.customer,
+        notes: newEvent.extendedProps.notes,
+        status: +newEvent.extendedProps.status,
+      },
+      resourceId,
+    };
+
+    db.ref()
+      .update(updates)
+      .then(() => {
         setToast({
           toastMessage: 'Appointment created successfully',
           showToast: true,
