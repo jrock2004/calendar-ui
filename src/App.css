@@ -28,3 +28,7 @@ div[class^="icon-container"] svg use:not([fill~="#"]) {
 div[class^="Toaster"] svg:hover {
   cursor: pointer;
 }
+
+#slot-duration-label {
+  display: none !important;
+}
