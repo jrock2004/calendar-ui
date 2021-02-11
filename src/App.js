@@ -7,6 +7,7 @@ import { Heading } from '@mbkit/typography';
 import { Toaster } from '@mbkit/toaster';
 import { IconClose } from '@mbkit/icon';
 
+import { db } from './services/firebase';
 import renderEventContent from './components/RenderEventContent';
 import resourceContent from './components/ResourceContent';
 import BubbleContainer from './components/BubbleContainer';
@@ -55,15 +56,30 @@ const App = () => {
     if (type === 'resources') setResources(response || []);
     else if (type === 'customers') setCustomers(response || []);
     else if (type === 'services') setServices(response || []);
-    else if (type === 'events') setEvents(response || []);
     else console.error('You do not have a use state for this setup yet');
   }
+
+  let setEventsFromFirebase = (newEvents) => {
+    setEvents(newEvents);
+  };
 
   useEffect(() => {
     requestResources('resources');
     requestResources('customers');
     requestResources('services');
-    requestResources('events');
+
+    db.ref('events').on('value', (snapshot) => {
+      let newEvents = [];
+
+      snapshot.forEach((snap) => {
+        newEvents.push({
+          id: snap.key,
+          ...snap.val(),
+        });
+      });
+
+      setEventsFromFirebase(newEvents);
+    });
   }, []);
 
   let resetSelectedEvent = () => {
@@ -129,7 +145,7 @@ const App = () => {
   };
 
   let handleEventClick = (info) => {
-    let event = events.find((ev) => +ev.id === +info.event.id);
+    let event = events.find((ev) => ev.id === info.event.id);
     let employee = resources.find((em) => +em.id === +event.resourceId);
     let service = services.find((ser) => ser.name === event.title);
 
@@ -184,8 +200,7 @@ const App = () => {
   let handleSubmit = (event) => {
     event.preventDefault();
 
-    let currentEvents = events,
-      {
+    let {
         customerId,
         employeeId,
         end,
@@ -197,7 +212,6 @@ const App = () => {
         startStr,
       } = selectedEvent,
       calendarApi = calendarRef.current.getApi(),
-      newId = +currentEvents.slice(-1)[0].id + 1,
       customer = customers.find((cs) => cs.id === +customerId),
       service = services.find((ser) => ser.id === +serviceId);
 
@@ -224,7 +238,6 @@ const App = () => {
             notes,
             status: 1,
           },
-          id: +newId,
           employeeId: employeeId,
           start: startStr,
           title: service.name,
@@ -238,30 +251,19 @@ const App = () => {
 
   let handleEventAdd = (event) => {
     let newEvent = event.event.toPlainObject(),
-      newId = +newEvent.id,
       resourceId = +newEvent.extendedProps.employeeId;
 
-    let data = [
-      ...events,
-      {
+    db.ref('events')
+      .push({
         ...newEvent,
         extendedProps: {
           customer: newEvent.extendedProps.customer,
           notes: newEvent.extendedProps.notes,
           status: +newEvent.extendedProps.status,
         },
-        id: newId,
         resourceId: resourceId,
-      },
-    ];
-
-    fetch(`${HOST}/events.json`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    })
-      .then((res) => res.json())
-      .then((response) => {
-        setEvents(response);
+      })
+      .then(() => {
         resetSelectedEvent();
 
         setToast({
@@ -276,34 +278,28 @@ const App = () => {
 
     if (!isUpdatingEvent) {
       let resourceId = newEvent.extendedProps.employeeId
-          ? +newEvent.extendedProps.employeeId
-          : +info.event.getResources()[0].id,
-        newId = +newEvent.id;
+        ? +newEvent.extendedProps.employeeId
+        : +info.event.getResources()[0].id;
 
-      let eventsArray = events.map((ev) => {
-        if (+ev.id === +newEvent.id) {
-          return {
-            ...newEvent,
-            extendedProps: {
-              customer: newEvent.extendedProps.customer,
-              notes: newEvent.extendedProps.notes,
-              status: +newEvent.extendedProps.status,
-            },
-            id: newId,
-            resourceId,
-          };
-        } else {
-          return ev;
-        }
-      });
+      let updates = {},
+        param = `/events/${newEvent.id}`;
 
-      fetch(`${HOST}/events.json`, {
-        method: 'PUT',
-        body: JSON.stringify(eventsArray),
-      })
-        .then((res) => res.json())
-        .then((response) => {
-          setEvents(response);
+      updates[param] = {
+        ...newEvent,
+        extendedProps: {
+          customer: newEvent.extendedProps.customer,
+          notes: newEvent.extendedProps.notes,
+          status: +newEvent.extendedProps.status,
+        },
+        resourceId,
+      };
+
+      // Delete the firebase id as we do not need it anymore
+      delete updates[param].id;
+
+      db.ref()
+        .update(updates)
+        .then(() => {
           setToast({
             toastMessage: 'Appointment was updated successfully',
             showToast: true,
@@ -313,29 +309,24 @@ const App = () => {
   };
 
   let handleEventRemove = (info) => {
-    let deleteEvent = info.event;
+    let deleteEvent = info.event,
+      param = `/events/${deleteEvent.id}`;
 
-    let data = events.filter((ev) => +ev.id !== +deleteEvent.id);
-
-    fetch(`${HOST}/events.json`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }).then(() => {
-      toggleEditAppointment();
-
-      setEvents(data);
-
-      setToast({
-        toastMessage: `${info.event.title} appointment has been cancelled`,
-        showToast: true,
+    db.ref(param)
+      .remove()
+      .then(() => {
+        toggleEditAppointment();
+        setToast({
+          toastMessage: `${deleteEvent.title} appointment has been cancelled`,
+          showToast: true,
+        });
       });
-    });
   };
 
   let clickEventCancel = (event) => {
     event.preventDefault();
 
-    let currentEvent = calendarRef.current.getApi().getEventById(+selectedEvent.eventId);
+    let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.eventId);
 
     currentEvent.remove();
   };
@@ -350,7 +341,7 @@ const App = () => {
   let handleConfirmClick = (ev) => {
     ev.preventDefault();
 
-    let currentEvent = calendarRef.current.getApi().getEventById(+selectedEvent.eventId);
+    let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.eventId);
 
     currentEvent.setExtendedProp('status', 2);
 
