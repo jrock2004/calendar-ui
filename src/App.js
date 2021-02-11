@@ -6,6 +6,8 @@ import addMinutes from 'date-fns/addMinutes';
 import { Heading } from '@mbkit/typography';
 import { Toaster } from '@mbkit/toaster';
 import { IconClose } from '@mbkit/icon';
+import { Select } from '@mbkit/select';
+import { Label } from '@mbkit/label';
 
 import { db } from './services/firebase';
 import renderEventContent from './components/RenderEventContent';
@@ -18,6 +20,9 @@ import './App.css';
 const HOST = 'https://scheduling-99b8a.firebaseio.com';
 
 const App = () => {
+  const [calendarOptions, setCalendarOption] = useState({
+    slotDuration: '00:15:00',
+  });
   const [resources, setResources] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [services, setServices] = useState([]);
@@ -348,12 +353,40 @@ const App = () => {
     toggleEditAppointment();
   };
 
+  let handleSlotDurationChange = (ev) => {
+    let calendarApi = calendarRef.current.getApi(),
+      value = ev.target.value;
+
+    setCalendarOption({
+      ...calendarOptions,
+      slotDuration: value,
+    });
+
+    calendarApi.setOption('slotDuration', value);
+  };
+
   return (
     <div className="h-full grid main-container">
-      <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg">
+      <header className="mb-4 bg-black text-white px-6 py-4 shadow-lg flex justify-between items-center">
         <Heading as="h1" color="primary">
           Scheduling
         </Heading>
+        <div>
+          <div className="w-32">
+            <Label htmlFor="slot-duration" id="slot-duration-label">
+              Time Duration
+            </Label>
+            <Select
+              value={calendarOptions.slotDuration}
+              id="slot-duration"
+              onChange={handleSlotDurationChange}
+            >
+              <option value="00:15:00">15 Min</option>
+              <option value="00:30:00">30 Min</option>
+              <option value="01:00:00">1 Hr</option>
+            </Select>
+          </div>
+        </div>
       </header>
       <main className="px-6 pt-4">
         <FullCalendar
