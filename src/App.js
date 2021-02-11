@@ -103,11 +103,16 @@ const App = () => {
     });
   };
 
-  let toggleNewAppointment = () => {
+  let toggleNewAppointment = (removeAppt = false) => {
     let { showNewAppointmentBubble } = bubble;
 
     // If we are closing the bubble, clear out old values
     if (showNewAppointmentBubble) {
+      if (removeAppt) {
+        let param = `/events/${selectedEvent.id}`;
+
+        db.ref(param).remove();
+      }
       resetSelectedEvent();
     }
 

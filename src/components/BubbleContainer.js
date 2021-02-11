@@ -38,7 +38,7 @@ export const BubbleContainer = ({
           <button type="button" onClick={handleExpand}>
             <IconComputer />
           </button>
-          <button type="button" onClick={toggleBubble}>
+          <button type="button" onClick={() => toggleBubble(true)}>
             <IconClose />
           </button>
         </div>
