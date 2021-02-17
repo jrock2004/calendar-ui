@@ -1,0 +1,105 @@
+.app {
+  display: grid;
+  grid-template-columns: 167px 1fr;
+  height: 100%;
+  overflow: hidden;
+  width: 100%;
+}
+
+.appNoSide {
+  display: block;
+}
+
+.header {
+  background: rgb(33, 69, 77);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.logo {
+  width: 130px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.125rem;
+  margin-top: 48px;
+}
+
+.navLink {
+  color: #fff;
+  display: block;
+  font-weight: 400;
+  letter-spacing: .025em;
+  padding: 16px 16px;
+  text-decoration: none;
+}
+
+.navLinkActive {
+  background: rgba(0, 0, 0, .5);
+}
+
+.slotDurationContainer {
+  margin-top: auto;
+  margin-bottom: 24px;
+  padding: 0 16px;
+}
+
+.slotDurationLabel {
+  color: #fff;
+}
+
+.main {
+  height: 95%;
+  width: 100%;
+}
+
+.mainHeader {
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+}
+
+.mainHeaderRight {
+  align-items: center;
+  display: flex;
+}
+
+.toggleMenu {
+  background: transparent;
+  border: none;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.headerSearch {
+  margin-right: 20px;
+  width: 300px;
+}
+
+.headerIcons {
+  margin-left: 16px;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.calendarWrapper {
+  height: 100%;
+  margin-top: 12px;
+  overflow: scroll;
+  padding: 0 16px;
+}

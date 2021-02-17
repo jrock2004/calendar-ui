@@ -1,0 +1,34 @@
+.appointmentEvent {
+  background: transparent;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+  width: 100%;
+
+  &:hover {
+    box-shadow: 1px 1px 12px rgb(55,136,216);
+    cursor: pointer;
+  }
+}
+
+.appointmentEventUpperRight {
+  display: flex;
+}
+
+.appointmentEventText {
+  color: #fff;
+  text-align: left;
+}
+
+.appointmentEventIcon {
+  color: #fff;
+  margin-right: .25rem;
+}
+
+.appointmentEventTopRow {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
