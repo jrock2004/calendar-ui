@@ -1,0 +1,18 @@
+.customerEventInfo {
+  align-items: center;
+  display: flex;
+
+  &Main {
+    padding-left: 16px;
+  }
+
+  &Time {
+    color: #878787;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  &Name {
+    color: #0a7c8e;
+  }
+}

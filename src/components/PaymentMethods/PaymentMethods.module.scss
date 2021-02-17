@@ -1,0 +1,16 @@
+.paymentMethods {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+
+  &Button {
+    justify-content: flex-end;
+    padding: 0 !important;
+
+    span {
+      justify-content: flex-end !important;
+      padding: 0 !important;
+      text-align: right;
+    }
+  }
+}

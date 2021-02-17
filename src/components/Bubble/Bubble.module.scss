@@ -1,0 +1,111 @@
+.bubble {
+  background: rgba(0, 0, 0, .5);
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 200;
+
+  &Container {
+    background: #fff;
+    box-shadow: -6px 0px 15px -3px #000;
+    padding: 0 16px;
+    position: relative;
+    width: 400px;
+  }
+
+  &Header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+
+    &Edit {
+      padding: 0 !important;
+
+      > span {
+        min-width: auto !important;
+        padding: 0 !important;
+      }
+    }
+  }
+
+  &Content {
+    margin-top: 24px;
+  }
+
+  &Room {
+    align-items: center;
+    display: flex;
+    margin: 6px 0 16px 0;
+
+    svg {
+      height: 24px;
+      margin-right: 4px;
+      width: 24px;
+    }
+  }
+
+  &CheckIn {
+    width: 100%;
+  }
+
+  &LinkContainer {
+    display: flex;
+    justify-content: space-around;
+    margin: 16px 0 24px 0;
+
+    button > span {
+      padding: 0 !important;
+    }
+  }
+
+  &Divider {
+    margin-bottom: 24px;
+    padding: 0 16px;
+
+    hr {
+      border-top: 2px solid rgba(0, 0, 0, .1);
+      border-radius: 3px;
+    }
+  }
+
+  &Notes,
+  &BalancePayments,
+  &PaymentMethods,
+  &Field {
+    margin-bottom: 24px;
+  }
+
+  &EmployeeInfo {
+    align-items: center;
+    display: flex;
+    margin-top: 10px;
+
+    button {
+      margin-left: 16px;
+      padding: 0 !important;
+
+      > span {
+        min-width: auto !important;
+        padding: 0 !important;
+      }
+    }
+  }
+
+  &Footer {
+    border-top: 1px solid #ccc;
+    bottom: 0;
+    left: 0;
+    padding: 16px;
+    position: absolute;
+    right: 0;
+
+    button {
+      width: 100%;
+    }
+  }
+}
