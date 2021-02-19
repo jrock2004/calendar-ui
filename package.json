@@ -1,6 +1,6 @@
 {
   "name": "calendar-ui",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "private": true,
   "dependencies": {
     "@commitlint/cli": "^8.3.5",
@@ -91,5 +91,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "devDependencies": {
+    "eslint-plugin-jsx-a11y": "^6.4.1"
   }
 }
