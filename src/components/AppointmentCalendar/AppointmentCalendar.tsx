@@ -127,15 +127,15 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
   let handleDateClick = (selectInfo: DateSelectArg) => {
     let { end, endStr, resource, start, startStr } = selectInfo;
 
-    if (!isLocalEditing) {
+    if (!isLocalEditing && resource) {
       setIsLocalEditing(true);
 
       let newEvent = {
         ...selectedEvent,
         end,
         endStr,
-        employeeId: +resource!.id,
-        employeeName: resource!.title,
+        employeeId: +resource.id,
+        employeeName: resource.title,
         start,
         startStr,
       };
@@ -166,9 +166,9 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
   let handleEventClick = (info: EventClickArg) => {
     let event = events.find((ev) => ev.id === info.event.id);
 
-    if (event && event.extendedProps && event.end) {
-      let employee = resources.find((em) => em.id === event!.resourceId);
-      let service = services.find((serv) => serv.name === event!.title);
+    if (event && event.extendedProps && event.end && event.resourceId && event.title) {
+      let employee = resources.find((em) => em.id === event?.resourceId);
+      let service = services.find((serv) => serv.name === event?.title);
       let customerId = event.extendedProps.customerId;
       let customerName = event.extendedProps.customerName;
 
@@ -195,19 +195,28 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
   };
 
   let handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event && event.target.name === 'serviceId' && selectedEvent && selectedEvent.start) {
+    if (
+      event &&
+      event.target.name === 'serviceId' &&
+      selectedEvent &&
+      selectedEvent.start &&
+      calendarRef &&
+      calendarRef.current
+    ) {
       let service = services.find((serv) => serv.id === +event.target.value),
-        calendarApi = calendarRef.current!.getApi(),
+        calendarApi = calendarRef.current.getApi(),
         endDate = toMoment(new Date(selectedEvent.start.toString()), calendarApi)
-          .add(service!.duration, 'minutes')
+          .add(service?.duration, 'minutes')
           .format();
 
-      setSelectedEvent({
-        ...selectedEvent,
-        end: endDate,
-        endStr: calendarApi.formatIso(endDate),
-        serviceId: service!.id,
-      });
+      if (service) {
+        setSelectedEvent({
+          ...selectedEvent,
+          end: endDate,
+          endStr: calendarApi.formatIso(endDate),
+          serviceId: service.id,
+        });
+      }
     } else if (event && event.target.name === 'employeeId') {
       setSelectedEvent({
         ...selectedEvent,
@@ -275,49 +284,52 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
 
     setIsLocalEditing(false);
 
-    let { customerId, employeeId, end, id, notes, serviceId, start } = selectedEvent,
-      calendarApi = calendarRef.current!.getApi(),
-      customer = customers.find((cs) => cs.id === +customerId!),
-      service = services.find((ser) => ser.id === +serviceId!);
+    let { customerId, employeeId, end, id, notes, serviceId, start } = selectedEvent;
 
-    if (bubbleOptions.isEditing) {
-      if (customer && employeeId && end && id && service && start) {
-        let someEvent = calendarApi.getEventById(id);
+    if (customerId && serviceId && calendarRef && calendarRef.current) {
+      let calendarApi = calendarRef.current?.getApi(),
+        customer = customers.find((cs) => cs.id === +customerId),
+        service = services.find((ser) => ser.id === +serviceId);
 
-        if (someEvent && isUpdatingEvent !== null) {
-          isUpdatingEvent = true;
+      if (bubbleOptions.isEditing && calendarApi) {
+        if (customer && employeeId && end && id && service && start) {
+          let someEvent = calendarApi.getEventById(id);
 
-          someEvent.setProp('title', service.name);
-          someEvent.setEnd(end);
-          someEvent.setStart(start);
-          someEvent.setExtendedProp('customerId', customer.id);
-          someEvent.setExtendedProp('customerName', customer.fullName);
-          someEvent.setExtendedProp('employeeId', employeeId);
+          if (someEvent && isUpdatingEvent !== null) {
+            isUpdatingEvent = true;
 
-          isUpdatingEvent = false;
-          someEvent.setExtendedProp('notes', notes);
+            someEvent.setProp('title', service.name);
+            someEvent.setEnd(end);
+            someEvent.setStart(start);
+            someEvent.setExtendedProp('customerId', customer.id);
+            someEvent.setExtendedProp('customerName', customer.fullName);
+            someEvent.setExtendedProp('employeeId', employeeId);
 
-          toggleBubble(false, false);
+            isUpdatingEvent = false;
+            someEvent.setExtendedProp('notes', notes);
+
+            toggleBubble(false, false);
+          }
         }
-      }
-    } else {
-      calendarApi.addEvent(
-        {
-          end: end,
-          extendedProps: {
-            customerId: +customer!.id,
-            customerName: `${customer?.firstName} ${customer?.lastName}`,
-            notes,
-            status: 1,
+      } else if (customer && service) {
+        calendarApi.addEvent(
+          {
+            end: end,
+            extendedProps: {
+              customerId: +customer.id,
+              customerName: `${customer?.firstName} ${customer?.lastName}`,
+              notes,
+              status: 1,
+            },
+            employeeId: employeeId,
+            start: start,
+            title: service.name,
           },
-          employeeId: employeeId,
-          start: start,
-          title: service!.name,
-        },
-        true
-      );
+          true
+        );
 
-      toggleBubble(true, false);
+        toggleBubble(true, false);
+      }
     }
   };
 

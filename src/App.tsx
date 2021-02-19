@@ -64,10 +64,10 @@ export const App: React.FC = () => {
             </div>
           </div>
           <nav className={styles.nav}>
-            <a href="#" className={styles.navLink}>
+            <a href="/" className={styles.navLink}>
               Dashboard
             </a>
-            <a href="#" className={`${styles.navLink} ${styles.navLinkActive}`}>
+            <a href="/" className={`${styles.navLink} ${styles.navLinkActive}`}>
               Schedule
             </a>
           </nav>
