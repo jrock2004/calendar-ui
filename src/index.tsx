@@ -2,13 +2,28 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-/**
- * If you are loading the UI from within the consuming application and need special attention or to pass specific data,
- * replace the mount below with a unique function that you can call from the consuming application e.g.
- *
- * window.loadMyApplicationName = (mount = document.getElementById('root'), { ...your arguments needed }) => {
- *      ReactDOM.render(<App {...pass arguments along} />, mount);
- * }
- */
+declare global {
+  interface Window {
+    loadSharedUi: (data: Data, mount: HTMLElement | null) => void;
+  }
+}
 
-ReactDOM.render(<App />, document.getElementById('root'));
+export type Data = {
+  routeToLoad?: string;
+  token: string;
+};
+
+if (process.env.NODE_ENV === 'development') {
+  let passedInData = {
+    token: 'my-bad-token',
+  };
+
+  ReactDOM.render(<App data={passedInData} />, document.getElementById('root'));
+} else {
+  window.loadSharedUi = (
+    data: Data,
+    mount: HTMLElement | null = document.getElementById('root')
+  ) => {
+    ReactDOM.render(<App data={data} />, mount);
+  };
+}

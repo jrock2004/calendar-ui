@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from 'react';
 import firebase from 'firebase';
 import { ResourceApi } from '@fullcalendar/resource-common';
 import { EventInput } from '@fullcalendar/react';
@@ -17,7 +18,7 @@ firebase.initializeApp(config);
 
 export const db = firebase.database();
 
-export const getResources = (setResourcesFromFirebase: any) => {
+export const getResources = (setResourcesFromFirebase: Dispatch<SetStateAction<ResourceApi[]>>) => {
   db.ref('resources').on('value', (snapshot) => {
     let newResources: ResourceApi[] = [];
 
@@ -32,7 +33,7 @@ export const getResources = (setResourcesFromFirebase: any) => {
   });
 };
 
-export const getServices = (setServicesFromFirebase: any) => {
+export const getServices = (setServicesFromFirebase: Dispatch<SetStateAction<IServices[]>>) => {
   db.ref('services').on('value', (snapshot) => {
     let newServices: IServices[] = [];
 
@@ -47,7 +48,7 @@ export const getServices = (setServicesFromFirebase: any) => {
   });
 };
 
-export const getCustomers = (setCustomersFromFirebase: any) => {
+export const getCustomers = (setCustomersFromFirebase: Dispatch<SetStateAction<ICustomer[]>>) => {
   db.ref('customers').on('value', (snapshot) => {
     let newCustomers: ICustomer[] = [];
 
@@ -62,7 +63,7 @@ export const getCustomers = (setCustomersFromFirebase: any) => {
   });
 };
 
-export const getEvents = (setEventsFromFirebase: any) => {
+export const getEvents = (setEventsFromFirebase: Dispatch<SetStateAction<EventInput[]>>) => {
   db.ref('events').on('value', (snapshot) => {
     let newEvents: EventInput[] = [];
 

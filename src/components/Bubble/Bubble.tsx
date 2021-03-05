@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { EventInput } from '@fullcalendar/react';
 import { ResourceApi } from '@fullcalendar/resource-common';
 import { Button } from '@mbkit/button';
 import { Card } from '@mbkit/card';
@@ -11,6 +10,8 @@ import { Text } from '@mbkit/typography';
 
 import styles from './Bubble.module.scss';
 import { ICustomer, IServices } from '../../interfaces/interfaces';
+import { useCalendar } from '../../customHooks/customHooks';
+import { CalendarActions } from '../../Reducers/CalendarReducer';
 
 import { Avatar } from '../Avatar/Avatar';
 import { CustomerEventInfo } from '../CustomerEventInfo/CustomerEventInfo';
@@ -22,11 +23,9 @@ interface Props {
   isNewEvent: boolean;
   isOpen: boolean;
   resources: ResourceApi[];
-  selectedEvent: EventInput;
   services: IServices[];
   handleChange: any; // FIXME: Not sure how to fix this to not use any
   handleCheckIn(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void;
-  handleConfirmClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void;
   handleEventCancel(event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void;
   handleSubmit(event: React.FormEvent<HTMLFormElement>): void;
   toggleBubble(isNewEvent: boolean, removeEvent: boolean): void;
@@ -38,15 +37,14 @@ export const Bubble: React.FC<Props> = ({
   isNewEvent,
   isOpen,
   resources,
-  selectedEvent,
   services,
   handleChange,
   handleCheckIn,
-  handleConfirmClick,
   handleEventCancel,
   handleSubmit,
   toggleBubble,
 }) => {
+  const { state, dispatch } = useCalendar();
   const [isEditMode, setIsEditMode] = useState(isNewEvent);
 
   const setEditMode = (mode: boolean) => {
@@ -65,7 +63,7 @@ export const Bubble: React.FC<Props> = ({
     notes = '',
     serviceId,
     status,
-  } = selectedEvent;
+  } = state.selectedEvent;
 
   let service = serviceId ? services.find((sv) => +sv.id === +serviceId) : null;
 
@@ -89,6 +87,22 @@ export const Bubble: React.FC<Props> = ({
     ev.preventDefault();
 
     console.log('Button is not working yet');
+  };
+
+  const handleConfirmClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.preventDefault();
+
+    if (state.calendarApi && state.selectedEvent && state.selectedEvent.id) {
+      let currentEvent = state.calendarApi.getEventById(state.selectedEvent.id);
+
+      dispatch({ type: CalendarActions.UPDATE_LOCAL_EDITING, payload: true });
+
+      if (currentEvent) {
+        currentEvent.setExtendedProp('status', 2);
+      }
+
+      toggleBubble(false, false);
+    }
   };
 
   if (isOpen) {

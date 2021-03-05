@@ -9,7 +9,6 @@ import FullCalendar, {
 } from '@fullcalendar/react';
 import interactionPlugin from '@fullcalendar/interaction';
 import resourceTimeGridPlugin from '@fullcalendar/resource-timegrid';
-import { CalendarOptions } from '@fullcalendar/common';
 import { ResourceApi } from '@fullcalendar/resource-common';
 import { toMoment } from '@fullcalendar/moment';
 import { Toaster } from '@mbkit/toaster';
@@ -17,17 +16,16 @@ import { Toaster } from '@mbkit/toaster';
 import styles from './AppointmentCalendar.module.scss';
 import { IBubbleOptions, ICustomer, IServices, IToast } from '../../interfaces/interfaces';
 import { db, getCustomers, getEvents, getResources, getServices } from '../../services/firebase';
+import { CalendarActions } from '../../Reducers/CalendarReducer';
+import { useCalendar } from '../../customHooks/customHooks';
 
 import { Bubble } from '../Bubble/Bubble';
 import { FullLoading } from '../FullLoading/FullLoading';
 import { RenderEventContent } from '../RenderEventContent/RenderEventContent';
 import { ResourceContent } from '../ResourceContent/ResourceContent';
 
-interface Props {
-  calendarOptions: CalendarOptions;
-}
-
-export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
+export const AppointmentCalendar: React.FC = () => {
+  const { state, dispatch } = useCalendar();
   const [customers, setCustomers] = useState<ICustomer[]>([]);
   const [events, setEvents] = useState<EventInput[]>([]);
   const [resources, setResources] = useState<ResourceApi[]>([]);
@@ -37,20 +35,6 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
     isNewEvent: false,
     isOpen: false,
   });
-  const [selectedEvent, setSelectedEvent] = useState<EventInput>({
-    customerId: null,
-    customerName: '',
-    employeeId: null,
-    employeeName: '',
-    end: '',
-    endStr: '',
-    id: '',
-    notes: '',
-    serviceId: null,
-    start: '',
-    startStr: '',
-    status: 3,
-  });
   const [isLocalEditing, setIsLocalEditing] = useState(false);
   const [toast, setToast] = useState<IToast>({
     showToast: false,
@@ -58,62 +42,45 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const setResourcesFromFirebase = (newResources: ResourceApi[]) => {
-    setResources(newResources);
-  };
-
-  const setEventsFromFirebase = (newEvents: EventInput[]) => {
-    setEvents(newEvents);
-  };
-
-  const setServicesFromFirebase = (services: IServices[]) => {
-    setServices(services);
-  };
-
-  const setCustomersFromFirebase = (customers: ICustomer[]) => {
-    setCustomers(customers);
-  };
-
-  let calendarRef = createRef<FullCalendar>(),
-    isUpdatingEvent: boolean = false;
+  const calendarOptions = state.calendarOptions;
+  const calendarRef = createRef<FullCalendar>();
+  let isUpdatingEvent: boolean = false;
 
   useEffect(() => {
-    getResources(setResourcesFromFirebase);
-    getServices(setServicesFromFirebase);
-    getCustomers(setCustomersFromFirebase);
-    getEvents(setEventsFromFirebase);
+    getResources(setResources);
+    getServices(setServices);
+    getCustomers(setCustomers);
+    getEvents(setEvents);
   }, []);
 
-  let resetSelectedEvent = () => {
-    setSelectedEvent({
-      customerId: null,
-      customerName: '',
-      employeeId: null,
-      employeeName: '',
-      end: '',
-      endStr: '',
-      id: '',
-      notes: '',
-      serviceId: null,
-      start: '',
-      startStr: '',
-      status: 3,
-    });
+  useEffect(() => {
+    if (calendarRef && calendarRef.current && !state.calendarApi) {
+      dispatch({
+        type: CalendarActions.UPDATE_CALENDAR_API,
+        payload: {
+          calendarApi: calendarRef.current.getApi(),
+        },
+      });
+    }
+  }, [state.calendarApi, calendarRef, dispatch]);
+
+  let handleCalendarLoading = (isLoading: boolean) => {
+    setIsLoading(isLoading);
   };
 
-  let toggleBubble = (isNewEvent: boolean = true, removeEvent: boolean = false) => {
+  const toggleBubble = (isNewEvent: boolean = true, removeEvent: boolean = false) => {
     let { isOpen } = bubbleOptions;
 
     if (isOpen) {
       if (removeEvent && !isNewEvent) {
-        let param: string = `/events/${selectedEvent.id}`;
+        let param: string = `/events/${state.selectedEvent.id}`;
 
         setIsLocalEditing(false);
 
         db.ref(param).remove();
       }
 
-      resetSelectedEvent();
+      dispatch({ type: CalendarActions.RESET_SELECTED_EVENT });
     }
 
     setBubbleOptions({
@@ -131,7 +98,7 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
       setIsLocalEditing(true);
 
       let newEvent = {
-        ...selectedEvent,
+        ...state.selectedEvent,
         end,
         endStr,
         employeeId: +resource.id,
@@ -151,9 +118,12 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
           start: startStr,
         })
         .then((res: any) => {
-          setSelectedEvent({
-            ...newEvent,
-            id: res.getKey(),
+          dispatch({
+            type: CalendarActions.UPDATE_SELECTED_EVENT,
+            payload: {
+              ...newEvent,
+              id: res.getKey(),
+            },
           });
 
           toggleBubble(true, false);
@@ -163,111 +133,55 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
     }
   };
 
-  let handleEventClick = (info: EventClickArg) => {
-    let event = events.find((ev) => ev.id === info.event.id);
-
-    if (event && event.extendedProps && event.end && event.resourceId && event.title) {
-      let employee = resources.find((em) => em.id === event?.resourceId);
-      let service = services.find((serv) => serv.name === event?.title);
-      let customerId = event.extendedProps.customerId;
-      let customerName = event.extendedProps.customerName;
-
-      if (employee && service) {
-        setSelectedEvent({
-          ...setSelectedEvent,
-          customerId,
-          customerName,
-          employeeId: +employee.id,
-          employeeName: employee.title,
-          end: event.end,
-          endStr: event.end.toString(),
-          id: event.id?.toString(),
-          notes: event.extendedProps.notes,
-          serviceId: service.id,
-          start: event.start,
-          startStr: event.start?.toString(),
-          status: event.extendedProps.status,
-        });
-
-        toggleBubble(false, false);
-      }
-    }
-  };
-
-  let handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (
       event &&
       event.target.name === 'serviceId' &&
-      selectedEvent &&
-      selectedEvent.start &&
-      calendarRef &&
-      calendarRef.current
+      state.selectedEvent &&
+      state.selectedEvent.start &&
+      state.calendarApi
     ) {
       let service = services.find((serv) => serv.id === +event.target.value),
-        calendarApi = calendarRef.current.getApi(),
-        endDate = toMoment(new Date(selectedEvent.start.toString()), calendarApi)
+        calendarApi = state.calendarApi,
+        endDate = toMoment(new Date(state.selectedEvent.start.toString()), calendarApi)
           .add(service?.duration, 'minutes')
           .format();
 
       if (service) {
-        setSelectedEvent({
-          ...selectedEvent,
-          end: endDate,
-          endStr: calendarApi.formatIso(endDate),
-          serviceId: service.id,
+        dispatch({
+          type: CalendarActions.UPDATE_SELECTED_EVENT,
+          payload: {
+            ...state.selectedEvent,
+            end: endDate,
+            endStr: calendarApi.formatIso(endDate),
+            serviceId: service.id,
+          },
         });
       }
     } else if (event && event.target.name === 'employeeId') {
-      setSelectedEvent({
-        ...selectedEvent,
-        [event.target.name]: +event.target.value,
+      dispatch({
+        type: CalendarActions.UPDATE_SELECTED_EVENT,
+        payload: {
+          ...state.selectedEvent,
+          [event.target.name]: +event.target.value,
+        },
       });
     } else {
-      setSelectedEvent({
-        ...selectedEvent,
-        [event.target.name]: event.target.value,
+      dispatch({
+        type: CalendarActions.UPDATE_SELECTED_EVENT,
+        payload: {
+          ...state.selectedEvent,
+          [event.target.name]: event.target.value,
+        },
       });
     }
   };
 
-  let handleCalendarLoading = (isLoading: boolean) => {
-    setIsLoading(isLoading);
-  };
-
-  let handleEventCancel = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleCheckIn = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
 
-    if (calendarRef && calendarRef.current && selectedEvent && selectedEvent.id) {
-      let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.id);
-
-      if (currentEvent) {
-        setIsLocalEditing(false);
-        currentEvent.remove();
-      }
-    }
-  };
-
-  let handleConfirmClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-
-    if (calendarRef && calendarRef.current && selectedEvent && selectedEvent.id) {
-      let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.id);
-
-      setIsLocalEditing(true);
-
-      if (currentEvent) {
-        currentEvent.setExtendedProp('status', 2);
-      }
-
-      toggleBubble(false, false);
-    }
-  };
-
-  let handleCheckIn = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    event.preventDefault();
-
-    if (calendarRef && calendarRef.current && selectedEvent && selectedEvent.id) {
-      let currentEvent = calendarRef.current.getApi().getEventById(selectedEvent.id);
+    if (state.calendarApi && state.selectedEvent && state.selectedEvent.id) {
+      let currentEvent = state.calendarApi.getEventById(state.selectedEvent.id);
 
       setIsLocalEditing(true);
 
@@ -279,66 +193,59 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
     }
   };
 
-  let handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleEventCancel = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     event.preventDefault();
 
-    setIsLocalEditing(false);
+    if (state.calendarApi && state.selectedEvent && state.selectedEvent.id) {
+      let currentEvent = state.calendarApi.getEventById(state.selectedEvent.id);
 
-    let { customerId, employeeId, end, id, notes, serviceId, start } = selectedEvent;
-
-    if (customerId && serviceId && calendarRef && calendarRef.current) {
-      let calendarApi = calendarRef.current?.getApi(),
-        customer = customers.find((cs) => cs.id === +customerId),
-        service = services.find((ser) => ser.id === +serviceId);
-
-      if (bubbleOptions.isEditing && calendarApi) {
-        if (customer && employeeId && end && id && service && start) {
-          let someEvent = calendarApi.getEventById(id);
-
-          if (someEvent && isUpdatingEvent !== null) {
-            isUpdatingEvent = true;
-
-            someEvent.setProp('title', service.name);
-            someEvent.setEnd(end);
-            someEvent.setStart(start);
-            someEvent.setExtendedProp('customerId', customer.id);
-            someEvent.setExtendedProp('customerName', customer.fullName);
-            someEvent.setExtendedProp('employeeId', employeeId);
-
-            isUpdatingEvent = false;
-            someEvent.setExtendedProp('notes', notes);
-
-            toggleBubble(false, false);
-          }
-        }
-      } else if (customer && service) {
-        calendarApi.addEvent(
-          {
-            end: end,
-            extendedProps: {
-              customerId: +customer.id,
-              customerName: `${customer?.firstName} ${customer?.lastName}`,
-              notes,
-              status: 1,
-            },
-            employeeId: employeeId,
-            start: start,
-            title: service.name,
-          },
-          true
-        );
-
-        toggleBubble(true, false);
+      if (currentEvent) {
+        setIsLocalEditing(false);
+        currentEvent.remove();
       }
     }
   };
 
-  let handleEventAdd = (event: EventAddArg) => {
+  const handleEventClick = (info: EventClickArg) => {
+    let event = events.find((ev) => ev.id === info.event.id);
+
+    if (event && event.extendedProps && event.end && event.resourceId && event.title) {
+      let employee = resources.find((em) => em.id === event?.resourceId);
+      let service = services.find((serv) => serv.name === event?.title);
+      let customerId = event.extendedProps.customerId;
+      let customerName = event.extendedProps.customerName;
+
+      if (employee && service) {
+        dispatch({
+          type: CalendarActions.UPDATE_SELECTED_EVENT,
+          payload: {
+            ...state.selectedEvent,
+            customerId,
+            customerName,
+            employeeId: +employee.id,
+            employeeName: employee.title,
+            end: event.end,
+            endStr: event.end.toString(),
+            id: event.id?.toString(),
+            notes: event.extendedProps.notes,
+            serviceId: service.id,
+            start: event.start,
+            startStr: event.start?.toString(),
+            status: event.extendedProps.status,
+          },
+        });
+
+        toggleBubble(false, false);
+      }
+    }
+  };
+
+  const handleEventAdd = (event: EventAddArg) => {
     let newEvent = event.event.toPlainObject(),
       resourceId = +newEvent.extendedProps.employeeId;
 
     let updates: any = {},
-      param = `/events/${selectedEvent.id}`;
+      param = `/events/${state.selectedEvent.id}`;
 
     updates[param] = {
       ...newEvent,
@@ -368,7 +275,7 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
       });
   };
 
-  let handleEventChange = (info: EventChangeArg) => {
+  const handleEventChange = (info: EventChangeArg) => {
     let newEvent = info.event.toPlainObject();
 
     if (!isUpdatingEvent) {
@@ -411,7 +318,7 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
     }
   };
 
-  let handleEventRemove = (info: EventRemoveArg) => {
+  const handleEventRemove = (info: EventRemoveArg) => {
     let deleteEvent = info.event,
       param = `/events/${deleteEvent.id}`;
 
@@ -434,6 +341,61 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
           });
         }, 7000);
       });
+  };
+
+  // TODO: Move to reducer or maybe into bubble component????
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setIsLocalEditing(false);
+
+    let { customerId, employeeId, end, id, notes, serviceId, start } = state.selectedEvent;
+
+    if (customerId && serviceId && calendarRef && calendarRef.current) {
+      let calendarApi = state.calendarApi,
+        customer = customers.find((cs) => cs.id === +customerId),
+        service = services.find((ser) => ser.id === +serviceId);
+
+      if (bubbleOptions.isEditing && calendarApi) {
+        if (customer && employeeId && end && id && service && start) {
+          let someEvent = calendarApi.getEventById(id);
+
+          if (someEvent && isUpdatingEvent !== null) {
+            isUpdatingEvent = true;
+
+            someEvent.setProp('title', service.name);
+            someEvent.setEnd(end);
+            someEvent.setStart(start);
+            someEvent.setExtendedProp('customerId', customer.id);
+            someEvent.setExtendedProp('customerName', customer.fullName);
+            someEvent.setExtendedProp('employeeId', employeeId);
+
+            isUpdatingEvent = false;
+            someEvent.setExtendedProp('notes', notes);
+
+            toggleBubble(false, false);
+          }
+        }
+      } else if (calendarApi && customer && service) {
+        calendarApi.addEvent(
+          {
+            end: end,
+            extendedProps: {
+              customerId: +customer.id,
+              customerName: `${customer?.firstName} ${customer?.lastName}`,
+              notes,
+              status: 1,
+            },
+            employeeId: employeeId,
+            start: start,
+            title: service.name,
+          },
+          true
+        );
+
+        toggleBubble(true, false);
+      }
+    }
   };
 
   return (
@@ -472,11 +434,9 @@ export const AppointmentCalendar: React.FC<Props> = ({ calendarOptions }) => {
         isNewEvent={bubbleOptions.isNewEvent}
         isOpen={bubbleOptions.isOpen}
         resources={resources}
-        selectedEvent={selectedEvent}
         services={services}
         handleChange={handleChange}
         handleCheckIn={handleCheckIn}
-        handleConfirmClick={handleConfirmClick}
         handleEventCancel={handleEventCancel}
         handleSubmit={handleSubmit}
         toggleBubble={toggleBubble}
