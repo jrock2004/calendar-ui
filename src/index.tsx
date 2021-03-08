@@ -13,17 +13,8 @@ export type Data = {
   token: string;
 };
 
-if (process.env.NODE_ENV === 'development') {
-  let passedInData = {
-    token: 'my-bad-token',
-  };
+let passedInData = {
+  token: 'my-bad-token',
+};
 
-  ReactDOM.render(<App data={passedInData} />, document.getElementById('root'));
-} else {
-  window.loadSharedUi = (
-    data: Data,
-    mount: HTMLElement | null = document.getElementById('root')
-  ) => {
-    ReactDOM.render(<App data={data} />, mount);
-  };
-}
+ReactDOM.render(<App data={passedInData} />, document.getElementById('root'));
